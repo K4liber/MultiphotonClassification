@@ -69,3 +69,40 @@ def reconstruction(FP, TP, TN, FN):
     ax.legend(loc='lower left')
     plt.title('pPs point source - JPET simulation recostrucion')
     plt.show()
+
+def createHistograms(df, name):
+    # All particles energy stats
+    figAll1 = plt.figure()
+    plt.hist(df[["e1"]].transpose(), bins=20)
+    plt.title('Energy loss - ' + name)
+    plt.xlabel('Energy [keV]')
+    plt.ylabel('#')
+    plt.savefig('stats/' + name + 'Energy.png')
+    # All particles t stats
+    figAll2 = plt.figure()
+    plt.hist(df[["dt"]].transpose(), bins=20)
+    plt.title('Detection time difference - ' + name)
+    plt.xlabel('time difference [ns]')
+    plt.ylabel('#')
+    plt.savefig('stats/' + name + 'Time.png')
+    # All particles x stats
+    figAll3 = plt.figure()
+    plt.hist(df[["x1"]].transpose(), bins=20)
+    plt.title('X position - ' + name)
+    plt.xlabel('Position [mm]')
+    plt.ylabel('#')
+    plt.savefig('stats/' + name + 'X.png')
+    # All particles y stats
+    figAll4 = plt.figure()
+    plt.hist(df[["y1"]].transpose(), bins=20)
+    plt.title('Y position - ' + name)
+    plt.xlabel('Position [mm]')
+    plt.ylabel('#')
+    plt.savefig('stats/' + name + 'Y.png')
+    # All particles z stats
+    figAll5 = plt.figure()
+    plt.hist(df[["z1"]].transpose(), bins=20)
+    plt.title('Z position - ' + name)
+    plt.xlabel('Position [mm]')
+    plt.ylabel('#')
+    plt.savefig('stats/' + name + 'Z.png')

@@ -8,9 +8,7 @@ from sklearn.preprocessing import StandardScaler
 import math
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from calc import emissionPoint
-from calc import loadDataFrames
-from calc import reconstruction
+from calc import emissionPoint, loadDataFrames, reconstruction, createHistograms
 
 # Load and transform data into sets 
 df, X_train, X_test, y_train, y_test, X_test_with_times = loadDataFrames('data.csv')
@@ -39,7 +37,7 @@ classifier.compile(
 )
 
 # Fitting our model 
-classifier.fit(X_train, y_train, batch_size = 1000, nb_epoch = 1000)
+classifier.fit(X_train, y_train, batch_size = 1000, nb_epoch = 2000)
 
 # Predicting the Test set results
 y_pred = classifier.predict(X_test)
@@ -60,43 +58,41 @@ TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
 TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
 FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
 
-reconstruction(FP, TP, TN, FN)
+# reconstruction(FP, TP, TN, FN)
 
 # Stats for all particles considered
-allStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "t1"]].drop_duplicates()
+allStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                    .drop_duplicates()
+createHistograms(allStatsFrame, 'all')
 
-# All particles energy stats
-figAll1 = plt.figure()
-plt.hist(allStatsFrame[["e1"]].transpose(), bins=20)
-plt.title('Energy loss - all particles')
-plt.xlabel('Energy [keV]')
-plt.ylabel('#')
-plt.savefig('allEnergy.png')
-# All particles t stats
-figAll2 = plt.figure()
-plt.hist(allStatsFrame[["t1"]].transpose(), bins=20)
-plt.title('Detection time - all particles')
-plt.xlabel('time [ns]')
-plt.ylabel('#')
-plt.savefig('allTime.png')
-# All particles x stats
-figAll3 = plt.figure()
-plt.hist(allStatsFrame[["x1"]].transpose(), bins=20)
-plt.title('X position - all particles')
-plt.xlabel('Position [mm]')
-plt.ylabel('#')
-plt.savefig('allX.png')
-# All particles y stats
-figAll4 = plt.figure()
-plt.hist(allStatsFrame[["y1"]].transpose(), bins=20)
-plt.title('Y position - all particles')
-plt.xlabel('Position [mm]')
-plt.ylabel('#')
-plt.savefig('allY.png')
-# All particles z stats
-figAll5 = plt.figure()
-plt.hist(allStatsFrame[["e1"]].transpose(), bins=20)
-plt.title('Z position - all particles')
-plt.xlabel('Position [mm]')
-plt.ylabel('#')
-plt.savefig('allZ.png')
+# Stats for pPs events
+pPsStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                    .loc[df['pPs'] == 1] \
+                    .drop_duplicates()
+createHistograms(pPsStatsFrame, 'pPs')
+
+# Stats for not pPs events
+notpPsStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                    .loc[df['pPs'] == 0] \
+                    .drop_duplicates()
+createHistograms(notpPsStatsFrame, 'notpPs')
+
+# Stats for FP events
+FPStatsFrame = FP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                    .drop_duplicates()
+createHistograms(FPStatsFrame, 'FP')
+
+# Stats for TP events
+TPStatsFrame = TP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                    .drop_duplicates()
+createHistograms(TPStatsFrame, 'TP')
+
+# Stats for TN events
+TNStatsFrame = TN[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                    .drop_duplicates()
+createHistograms(TNStatsFrame, 'TN')
+
+# Stats for FP events
+FNStatsFrame = FN[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                    .drop_duplicates()
+createHistograms(FNStatsFrame, 'FN')
