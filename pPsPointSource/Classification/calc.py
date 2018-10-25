@@ -29,11 +29,9 @@ def loadDataFrames(filename):
     return df, X_train, X_test, y_train, y_test, X_test_with_times
 
 def reconstruction(FP, TP, TN, FN):
-    # Initialize plot
     fig1 = plt.figure()
     ax = fig1.add_subplot(111, projection='3d')
 
-    # Add data to the plot
     for index, row in TP.iterrows():
         point = emissionPoint(row)
         ax.scatter(
@@ -71,38 +69,64 @@ def reconstruction(FP, TP, TN, FN):
     plt.show()
 
 def createHistograms(df, name):
-    # All particles energy stats
-    figAll1 = plt.figure()
+    plt.figure()
     plt.hist(df[["e1"]].transpose(), bins=20)
     plt.title('Energy loss - ' + name)
     plt.xlabel('Energy [keV]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'Energy.png')
-    # All particles t stats
-    figAll2 = plt.figure()
+
+    plt.figure()
     plt.hist(df[["dt"]].transpose(), bins=20)
     plt.title('Detection time difference - ' + name)
     plt.xlabel('time difference [ns]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'Time.png')
-    # All particles x stats
-    figAll3 = plt.figure()
+
+    plt.figure()
     plt.hist(df[["x1"]].transpose(), bins=20)
     plt.title('X position - ' + name)
     plt.xlabel('Position [mm]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'X.png')
-    # All particles y stats
-    figAll4 = plt.figure()
+ 
+    plt.figure()
     plt.hist(df[["y1"]].transpose(), bins=20)
     plt.title('Y position - ' + name)
     plt.xlabel('Position [mm]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'Y.png')
-    # All particles z stats
-    figAll5 = plt.figure()
+  
+    plt.figure()
     plt.hist(df[["z1"]].transpose(), bins=20)
     plt.title('Z position - ' + name)
     plt.xlabel('Position [mm]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'Z.png')
+
+def saveHistograms(X_test_with_times, y_test, y_pred, modelName):
+    pPsOrginalPositive = X_test_with_times[y_test > 0]
+    pPsOrginalNegative = X_test_with_times[y_test == 0]
+    pPsPredictedPositive = X_test_with_times[y_pred]
+    pPsPredictedNegative = X_test_with_times[y_pred == 0]
+
+    FP = pd.merge(pPsPredictedPositive,pPsOrginalNegative, how='inner')
+    TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
+    TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
+    FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
+
+    FPStatsFrame = FP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                        .drop_duplicates()
+    createHistograms(FPStatsFrame, modelName + '-FP-')
+
+    TPStatsFrame = TP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                        .drop_duplicates()
+    createHistograms(TPStatsFrame, modelName + '-TP-')
+
+    TNStatsFrame = TN[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                        .drop_duplicates()
+    createHistograms(TNStatsFrame, modelName + '-TN-')
+
+    FNStatsFrame = FN[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
+                        .drop_duplicates()
+    createHistograms(FNStatsFrame, modelName + '-FN-')
