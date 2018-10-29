@@ -2,13 +2,14 @@ import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from calc import loadDataFrames, saveHistograms
+from calc import loadDataFrames, saveHistograms, plot_confusion_matrix
 from sklearn.model_selection import RandomizedSearchCV
 from scipy import stats
 import numpy as np
 import matplotlib.pyplot as plt
 from xgboost import plot_tree
 from sklearn.metrics import confusion_matrix
+import pickle
 
 # Load and transform data into sets 
 df, X_train, X_test, y_train, y_test, X_test_with_times = loadDataFrames('data.csv')
@@ -41,12 +42,14 @@ y_pred = (y_pred > 0.5)
 
 # Creating the Confusion Matrix
 cm = confusion_matrix(y_test, y_pred)
-print(cm)
+plot_confusion_matrix(cm, classes=['pPs', 'no pPs'],
+    title='XGB')
 # evaluate predictions
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy: %.2f%%" % (accuracy * 100.0))
 
-print(clf.best_estimator_)
+# save model to file
+pickle.dump(clf.best_estimator_, open("stats/bestXGB.dat", "wb"))
 # plot single tree
 plot_tree(clf.best_estimator_, rankdir='LR')
 plt.show()

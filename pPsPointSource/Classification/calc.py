@@ -1,6 +1,8 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+import numpy as np
+import itertools
 
 def emissionPoint(row):
     den = row['t1']+row['t2']
@@ -70,35 +72,65 @@ def reconstruction(FP, TP, TN, FN):
 
 def createHistograms(df, name):
     plt.figure()
-    plt.hist(df[["e1"]].transpose(), bins=20)
+    plt.hist(df[["e1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
+    e1Mean = df["e1"].mean()
+    plt.axvline(e1Mean, color='k', linestyle='dashed', linewidth=1)
+    _, max_ = plt.ylim()
+    plt.text(   e1Mean + e1Mean/10, 
+                max_ - max_/10, 
+                'Mean: {:.2f}'.format(e1Mean))
     plt.title('Energy loss - ' + name)
     plt.xlabel('Energy [keV]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'Energy.png')
 
     plt.figure()
-    plt.hist(df[["dt"]].transpose(), bins=20)
+    plt.hist(df[["dt"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
+    dtMean = df["dt"].mean()
+    plt.axvline(dtMean, color='k', linestyle='dashed', linewidth=1)
+    _, max_ = plt.ylim()
+    plt.text(   dtMean + abs(dtMean/10), 
+                max_ - max_/10, 
+                'Mean: {:.2f}'.format(dtMean))
     plt.title('Detection time difference - ' + name)
     plt.xlabel('time difference [ns]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'Time.png')
 
     plt.figure()
-    plt.hist(df[["x1"]].transpose(), bins=20)
+    plt.hist(df[["x1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
+    x1Mean = df["x1"].mean()
+    plt.axvline(x1Mean, color='k', linestyle='dashed', linewidth=1)
+    _, max_ = plt.ylim()
+    plt.text(   x1Mean + abs(x1Mean/10), 
+                max_ - max_/10, 
+                'Mean: {:.2f}'.format(x1Mean))
     plt.title('X position - ' + name)
     plt.xlabel('Position [mm]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'X.png')
  
     plt.figure()
-    plt.hist(df[["y1"]].transpose(), bins=20)
+    plt.hist(df[["y1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
+    y1Mean = df["y1"].mean()
+    plt.axvline(y1Mean, color='k', linestyle='dashed', linewidth=1)
+    _, max_ = plt.ylim()
+    plt.text(   y1Mean + abs(y1Mean/10), 
+                max_ - max_/10, 
+                'Mean: {:.2f}'.format(y1Mean))
     plt.title('Y position - ' + name)
     plt.xlabel('Position [mm]')
     plt.ylabel('#')
     plt.savefig('stats/' + name + 'Y.png')
   
     plt.figure()
-    plt.hist(df[["z1"]].transpose(), bins=20)
+    plt.hist(df[["z1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
+    z1Mean = df["z1"].mean()
+    plt.axvline(z1Mean, color='k', linestyle='dashed', linewidth=1)
+    _, max_ = plt.ylim()
+    plt.text(   z1Mean + abs(z1Mean/10), 
+                max_ - max_/10, 
+                'Mean: {:.2f}'.format(z1Mean))
     plt.title('Z position - ' + name)
     plt.xlabel('Position [mm]')
     plt.ylabel('#')
@@ -117,16 +149,38 @@ def saveHistograms(X_test_with_times, y_test, y_pred, modelName):
 
     FPStatsFrame = FP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
                         .drop_duplicates()
-    createHistograms(FPStatsFrame, modelName + '-FP-')
+    createHistograms(FPStatsFrame, modelName + '-False Positive')
 
     TPStatsFrame = TP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
                         .drop_duplicates()
-    createHistograms(TPStatsFrame, modelName + '-TP-')
+    createHistograms(TPStatsFrame, modelName + '-True Positive')
 
     TNStatsFrame = TN[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
                         .drop_duplicates()
-    createHistograms(TNStatsFrame, modelName + '-TN-')
+    createHistograms(TNStatsFrame, modelName + '-True Negative')
 
     FNStatsFrame = FN[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
                         .drop_duplicates()
-    createHistograms(FNStatsFrame, modelName + '-FN-')
+    createHistograms(FNStatsFrame, modelName + '-False Negative')
+
+def plot_confusion_matrix(cm, classes,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
+    plt.savefig('stats/' + title + 'confMatrix.png')
