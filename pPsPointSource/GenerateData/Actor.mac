@@ -55,6 +55,7 @@
 /gate/actor/JPActor/global/enableVolumeName
 /gate/actor/JPActor/global/enableLocalTime
 /gate/actor/JPActor/global/enableGlobalTime
+/gate/actor/JPActor/global/enableScintilatorPosition
 
 /gate/actor/JPActor2/global/enableEventID
 /gate/actor/JPActor2/global/enableTrackID
@@ -68,6 +69,7 @@
 /gate/actor/JPActor2/global/enableVolumeName
 /gate/actor/JPActor2/global/enableLocalTime
 /gate/actor/JPActor2/global/enableGlobalTime
+/gate/actor/JPActor2/global/enableScintilatorPosition
 
 /gate/actor/JPActor3/global/enableEventID
 /gate/actor/JPActor3/global/enableTrackID
@@ -81,6 +83,7 @@
 /gate/actor/JPActor3/global/enableVolumeName
 /gate/actor/JPActor3/global/enableLocalTime
 /gate/actor/JPActor3/global/enableGlobalTime
+/gate/actor/JPActor3/global/enableScintilatorPosition
 
 #============================================================================================
 # Saving conditions - filter commands

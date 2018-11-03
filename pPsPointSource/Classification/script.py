@@ -18,7 +18,7 @@ classifier = Sequential()
 
 # Adding the first hidden layer
 classifier.add(
-    Dense(output_dim = 14, init = 'uniform', activation = 'relu', input_dim = 11)
+    Dense(output_dim = 14, init = 'uniform', activation = 'relu', input_dim = 12)
 )
 
 # Adding the first hidden layer
@@ -43,7 +43,7 @@ classifier.compile(
 )
 
 # Fitting our model 
-classifier.fit(X_train, y_train, batch_size = 16, nb_epoch = 1000)
+classifier.fit(X_train, y_train, batch_size = 16, nb_epoch = 100)
 
 # Predicting the Test set results
 y_pred = classifier.predict(X_test)
@@ -53,10 +53,8 @@ y_pred = (y_pred > 0.5)
 cm = confusion_matrix(y_test, y_pred)
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy: %.2f%%" % (accuracy * 100.0))
-plot_confusion_matrix(cm, classes=['pPs', 'no pPs'],
-        title='NN')
-
-# reconstruction(FP, TP, TN, FN)
+plot_confusion_matrix(cm, classes=['not pPs', 'pPs'],
+        title='NN - acc: ' + '%.2f' % (accuracy * 100.0) + '%, test size: ' + str(y_pred.size))
 
 # Stats for all particles considered
 allStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \

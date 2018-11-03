@@ -3,14 +3,37 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
 import itertools
+import math
+
+sOfL = 300 # mm/ns
 
 def emissionPoint(row):
-    den = row['t1']+row['t2']
+    x1 = row['x1']
+    y1 = row['y1']
+    z1 = row['z1']
+    x2 = row['x2']
+    y2 = row['y2']
+    z2 = row['z2']
+    dt = row['dt']
+    halfX = (x1 - x2)/2
+    halfY = (y1 - y2)/2
+    halfZ = (z1 - z2)/2
+    LORHalfSize = math.sqrt(halfX**2 + halfY**2 + halfZ**2)
+    versX = halfX/LORHalfSize
+    versY = halfY/LORHalfSize
+    versZ = halfZ/LORHalfSize
+    dX = dt*sOfL*versX/2
+    dY = dt*sOfL*versY/2
+    dZ = dt*sOfL*versZ/2
     return { 
-        'x':(row['x1']*row['t2']+row['x2']*row['t1'])/den,
-        'y':(row['y1']*row['t2']+row['y2']*row['t1'])/den,
-        'z':(row['z1']*row['t2']+row['z2']*row['t1'])/den,
+        'x':(x1+x2)/2 - dX,
+        'y':(y1+y2)/2 - dY,
+        'z':(z1+z2)/2 - dZ,
     }
+
+def centerDistance(row):
+    rec = emissionPoint(row)
+    return (math.sqrt(rec['x']**2+rec['y']**2+rec['z']**2))
 
 def loadDataFrames(filename):
     codes = {'detector1':1, 'detector2':2, 'detector3':3}
@@ -19,7 +42,7 @@ def loadDataFrames(filename):
         "EventID1", "EventID2", "TrackID1", "TrackID2", "x1", "y1", "z1", "x2", "y2", "z2",
         "e1", "e2", "dt", "t1", "t2", "vol1", "vol2", "pPs"
         ])
-
+    df['dist'] = df.apply(lambda row: centerDistance(row),axis=1)
     df['vol1'] = df['vol1'].map(codes)
     df['vol2'] = df['vol2'].map(codes)
     X = df.drop(['pPs'], axis=1)
@@ -146,6 +169,8 @@ def saveHistograms(X_test_with_times, y_test, y_pred, modelName):
     TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
     TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
     FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
+
+    reconstruction(FP, TP, TN, FN)
 
     FPStatsFrame = FP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
                         .drop_duplicates()

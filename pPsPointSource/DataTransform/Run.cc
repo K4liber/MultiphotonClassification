@@ -1,4 +1,5 @@
 #include "GlobalActorReader.hh"
+#include "calc.hh"
 #include "TCanvas.h"
 #include "TH1F.h"
 #include "TH2.h"
@@ -8,8 +9,13 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <TRandom3.h>
+#include <random>
 
 using namespace std;
+
+const int energyCut = 100; // keV
+const bool doSmear = true;
 
 struct gammaTrack {
   int eventID;
@@ -23,38 +29,6 @@ struct gammaTrack {
   string volume;
   bool pPs;
 };
-
-// WK My version
-TVector3 recoEmissionPoint(double x1, double y1, double z1, double time1,
-                            double x2, double y2, double z2, double time2) {
-  TVector3 hit1;
-  TVector3 hit2;
-  double t1 = 0;
-  double t2 = 0;
-  if (time1 < time2) {
-    hit1.SetXYZ(x1, y1, z1);
-    hit2.SetXYZ(x2, y2, z2);
-    t1 = time1;
-    t2 = time2;
-  } else {
-    hit2.SetXYZ(x1, y1, z1);
-    hit1.SetXYZ(x2, y2, z2);
-    t2 = time1;
-    t1 = time2;
-  }
-  TVector3 vCenter = (hit1 + hit2);
-  vCenter = 0.5 * vCenter;
-  TVector3 vVect = hit2 - hit1;
-  TVector3 vVersor = vVect.Unit();
-  double tDiff = (t1 - t2) / 2;
-  double speedOfLight = 300; /// mm/ns
-  double shift = tDiff * speedOfLight;
-  TVector3 vect;
-  vect.SetXYZ(vCenter.X() + shift * std::abs(vVersor.X()),
-              vCenter.Y() + shift * std::abs(vVersor.Y()),
-              vCenter.Z() + shift * std::abs(vVersor.Z()));
-  return vect;
-}
 
 vector<gammaTrack> data;
 TH1F *timeDiff = new TH1F("Pairs time differences", "Pairs time differences",
@@ -74,7 +48,7 @@ bool createStats = false;
 void saveEntry(gammaTrack &gt1, gammaTrack &gt2, bool isPPsEvent,
                ofstream &outputFile) {
   outputFile << gt1.eventID << "," << gt2.eventID << "," << gt1.trackID << ","
-             << gt2.trackID << "," << setprecision(20) << gt1.x << "," << gt1.y
+             << gt2.trackID << "," << gt1.x << "," << gt1.y
              << "," << gt1.z << "," << gt2.x << "," << gt2.y << "," << gt2.z
              << "," << gt1.energy << "," << gt2.energy << ","
              << gt1.globalTime - gt2.globalTime << "," << gt1.time << "," << gt2.time << ","
@@ -83,21 +57,36 @@ void saveEntry(gammaTrack &gt1, gammaTrack &gt2, bool isPPsEvent,
 }
 
 void readEntry(const GlobalActorReader &gar) {
-  auto hitPosition = gar.GetProcessPosition();
-  gammaTrack newOne;
+  // Energy cut - eletronic noise
+  Double_t energy = gar.GetEnergyLossDuringProcess();
+  if (doSmear) energy = smearEnergy(energy);
+  if (energy > energyCut) {
+    TVector3 hitPosition = gar.GetProcessPosition();
+    Double_t x = hitPosition.X();
+    Double_t y = hitPosition.Y();
+    Double_t z = hitPosition.Z();
+    Double_t globalTime = gar.GetGlobalTime();
+    if (doSmear) {
+      auto scintPosition = gar.GetScintilatorPosition();
+      x = scintPosition.X();
+      y = scintPosition.Y();
+      z = smearZ(z);
+      globalTime = smearTime(globalTime);
+    }
 
-  newOne.eventID = gar.GetEventID();
-  newOne.trackID = gar.GetTrackID();
-  newOne.x = hitPosition.X();
-  newOne.y = hitPosition.Y();
-  newOne.z = hitPosition.Z();
-  newOne.time = gar.GetLocalTime();
-  newOne.globalTime = gar.GetGlobalTime();
-  newOne.energy = gar.GetEnergyLossDuringProcess();
-  newOne.pPs = (gar.GetEnergyBeforeProcess() == 511);
-  newOne.volume = gar.GetVolumeName();
-
-  data.push_back(newOne);
+    gammaTrack newOne;
+    newOne.eventID = gar.GetEventID();
+    newOne.trackID = gar.GetTrackID();
+    newOne.x = x;
+    newOne.y = y;
+    newOne.z = z;
+    newOne.time = gar.GetLocalTime();
+    newOne.globalTime = globalTime;
+    newOne.energy = energy;
+    newOne.pPs = (gar.GetEnergyBeforeProcess() == 511);
+    newOne.volume = gar.GetVolumeName();
+    data.push_back(newOne);
+  }
 }
 
 void createCSVFile() {
@@ -157,7 +146,10 @@ void createCSVFile() {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 3) {
+  energySmearTest(1000000);
+  timeSmearTest(1000000);
+  zSmearTest(1000000);
+  if (argc < 4) {
     cerr << "Invalid number of variables." << endl;
   } else {
     string file_name(argv[1]);
