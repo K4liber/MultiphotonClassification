@@ -40,14 +40,27 @@ clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 y_pred = (y_pred > 0.5)
 
+# make predictions for train data
+y_pred_train = clf.predict(X_train)
+y_pred_train = (y_pred_train > 0.5)
+
 # evaluate predictions
 accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy: %.2f%%" % (accuracy * 100.0))
+print("Accuracy (test): %.2f%%" % (accuracy * 100.0))
+accuracyTrain = accuracy_score(y_train, y_pred_train)
+print("Accuracy (train): %.2f%%" % (accuracyTrain * 100.0))
 
-# Creating the Confusion Matrix
+# Creating the Confusion Matrixes
 cm = confusion_matrix(y_test, y_pred)
 plot_confusion_matrix(cm, classes=['not pPs', 'pPs'],
-    title='XGB - acc: ' + (accuracy * 100.0) + '%, test size: ' + y_pred.length)
+    modelName='XGB-test',
+    accuracy='Accuracy: ' + '%.2f' % (accuracy * 100.0) + '%, size: ' + str(y_pred.size)
+)
+cmTrain = confusion_matrix(y_train, y_pred_train)
+plot_confusion_matrix(cmTrain, classes=['not pPs', 'pPs'],
+    modelName='XGB-train',
+    accuracy='Accuracy: ' + '%.2f' % (accuracyTrain * 100.0) + '%, size: ' + str(y_pred_train.size)
+)
 
 # save model to file
 pickle.dump(clf.best_estimator_, open("stats/bestXGB.dat", "wb"))
@@ -55,4 +68,4 @@ pickle.dump(clf.best_estimator_, open("stats/bestXGB.dat", "wb"))
 plot_tree(clf.best_estimator_, rankdir='LR')
 plt.show()
 
-saveHistograms(X_test_with_times, y_test, y_pred, "XGB")
+# saveHistograms(X_test_with_times, y_test, y_pred, "XGB")
