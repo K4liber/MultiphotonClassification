@@ -4,8 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import itertools
 import math
+from sklearn.metrics import roc_curve, auc
 
 sOfL = 300 # mm/ns
+names = [
+    "EventID1", "EventID2", "TrackID1", "TrackID2", "x1", "y1", "z1", "x2", "y2", "z2",
+    "e1", "e2", "dt", "t1", "t2", "vol1", "vol2", "pPs"
+]
 
 def emissionPoint(row):
     x1 = row['x1']
@@ -35,14 +40,14 @@ def centerDistance(row):
     rec = emissionPoint(row)
     return (math.sqrt(rec['x']**2+rec['y']**2+rec['z']**2))
 
+def energySum(row):
+    return (row['e1'] + row['e2'])
+
 def loadDataFrames(filename):
     codes = {'detector1':1, 'detector2':2, 'detector3':3}
-    df = pd.read_csv(filename,
-        names = [
-        "EventID1", "EventID2", "TrackID1", "TrackID2", "x1", "y1", "z1", "x2", "y2", "z2",
-        "e1", "e2", "dt", "t1", "t2", "vol1", "vol2", "pPs"
-        ])
+    df = pd.read_csv(filename, names = names)
     df['dist'] = df.apply(lambda row: centerDistance(row),axis=1)
+    df['energySum'] = df.apply(lambda row: energySum(row),axis=1)
     df['vol1'] = df['vol1'].map(codes)
     df['vol2'] = df['vol2'].map(codes)
     X = df.drop(['pPs'], axis=1)
@@ -213,3 +218,15 @@ def plot_confusion_matrix(cm, classes, modelName, accuracy, cmap=plt.cm.Blues):
     plt.xlabel('Predicted label')
     plt.tight_layout()
     plt.savefig('stats/' + modelName + 'confMatrix.png')
+
+def createROC(modelName, y, y_pred):
+    fpr_keras, tpr_keras, _ = roc_curve(y, y_pred)
+    auc_keras = auc(fpr_keras, tpr_keras)
+    plt.clf()
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.plot(fpr_keras, tpr_keras, label='AUC = {:.3f}'.format(auc_keras))
+    plt.xlabel('False positive rate')
+    plt.ylabel('True positive rate')
+    plt.title(modelName + '-ROC')
+    plt.legend(loc='best')
+    plt.savefig('stats/' + modelName + '-ROC.png')

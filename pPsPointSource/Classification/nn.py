@@ -9,63 +9,61 @@ from sklearn.preprocessing import StandardScaler
 import math
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from calc import emissionPoint, loadDataFrames, reconstruction, createHistograms, saveHistograms, plot_confusion_matrix
+from calc import createHistograms, saveHistograms, plot_confusion_matrix
+from calc import loadDataFrames, reconstruction, createROC
 
 class TrainCallback(Callback):
     def __init__(self, train_data):
         self.train_data = train_data
         self.acc = 0
         self.cm = None
+        self.y_pred_values = None
 
     def on_train_end(self, epoch, logs={}):
         x_train, y_train = self.train_data
-        y_pred = self.model.predict(x_train)
-        y_pred = (y_pred > 0.5)
+        self.y_pred_values = self.model.predict(x_train)
+        y_pred = (self.y_pred_values > 0.5)
         self.acc = accuracy_score(y_train, y_pred)
         self.cm = confusion_matrix(y_train, y_pred)
         print('\nTraining acc: {}\n'.format(self.acc))
 
+def buildNN():
+    model = Sequential()
+    model.add(
+        Dense(output_dim = 14, init = 'uniform', activation = 'relu', input_dim = 13)
+    )
+    model.add(
+        Dense(output_dim = 10, init = 'uniform', activation = 'relu')
+    )
+    model.add(
+        Dense(output_dim = 8, init = 'uniform', activation = 'relu')
+    )
+    model.add(
+        Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid')
+    )
+    sgd = keras.optimizers.SGD(lr=0.05, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(
+        optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy']
+    )
+    return model
 
 # Load and transform data into sets 
 df, X_train, X_test, y_train, y_test, X_test_with_times = loadDataFrames('data.csv')
 
-# Initializing Neural Network
-classifier = Sequential()
-
-# Adding the first hidden layer
-classifier.add(
-    Dense(output_dim = 14, init = 'uniform', activation = 'relu', input_dim = 12)
-)
-
-# Adding the first hidden layer
-classifier.add(
-    Dense(output_dim = 10, init = 'uniform', activation = 'relu')
-)
-
-# Adding the second hidden layer
-classifier.add(
-    Dense(output_dim = 8, init = 'uniform', activation = 'relu')
-)
-
-# Adding the output layer
-classifier.add(
-    Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid')
-)
-
-sgd = keras.optimizers.SGD(lr=0.05, decay=1e-6, momentum=0.9, nesterov=True)
-# Compiling Neural Network
-classifier.compile(
-    optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy']
-)
+classifier = buildNN()
 
 trainCallback = TrainCallback((X_train, y_train))
 # Fitting our model 
-obj = classifier.fit(X_train, y_train, batch_size = 16, nb_epoch = 1000, 
+obj = classifier.fit(X_train, y_train, batch_size = 16, nb_epoch = 30, 
     callbacks=[trainCallback])
 
 # Predicting the Test set results
-y_pred = classifier.predict(X_test)
-y_pred = (y_pred > 0.5)
+y_pred_values = classifier.predict(X_test)
+y_pred = (y_pred_values > 0.5)
+
+# Create ROC curves
+createROC('NN-test', y_test, y_pred_values)
+createROC('NN-train', y_train, trainCallback.y_pred_values)
 
 # Creating the Confusion Matrix
 cmTest = confusion_matrix(y_test, y_pred)

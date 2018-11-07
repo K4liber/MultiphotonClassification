@@ -2,7 +2,7 @@ import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from calc import loadDataFrames, saveHistograms, plot_confusion_matrix
+from calc import loadDataFrames, saveHistograms, plot_confusion_matrix, createROC
 from sklearn.model_selection import RandomizedSearchCV
 from scipy import stats
 import numpy as np
@@ -28,7 +28,7 @@ param_dist = {'n_estimators': stats.randint(300, 600),
 
 clf = RandomizedSearchCV(model, 
                          param_distributions = param_dist,  
-                         n_iter = 50,
+                         n_iter = 5,
                          scoring = 'roc_auc', 
                          error_score = 0, 
                          verbose = 2, 
@@ -37,12 +37,16 @@ clf = RandomizedSearchCV(model,
 clf.fit(X_train, y_train)
 
 # make predictions for test data
-y_pred = clf.predict(X_test)
-y_pred = (y_pred > 0.5)
+y_pred_values = clf.predict(X_test)
+y_pred = (y_pred_values > 0.5)
 
 # make predictions for train data
-y_pred_train = clf.predict(X_train)
-y_pred_train = (y_pred_train > 0.5)
+y_pred_values_train = clf.predict(X_train)
+y_pred_train = (y_pred_values_train > 0.5)
+
+# Create ROC curves
+createROC('XGB-train', y_train, y_pred_values_train)
+createROC('XGB-test', y_test, y_pred_values)
 
 # evaluate predictions
 accuracy = accuracy_score(y_test, y_pred)
