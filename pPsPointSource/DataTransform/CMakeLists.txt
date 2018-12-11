@@ -27,7 +27,7 @@ set(projectBinary ${projectName}.x)
 
 project(${projectName} CXX) # using only C++
 
-add_definitions(-std=c++11) # using C++11 standard
+add_definitions(-std=c++11 -Wall) # using C++11 standard
 
 ################################################################################
 # Handling of ROOT 
@@ -62,10 +62,18 @@ endif()
 ################################################################################
 # Sources and linking 
 ################################################################################
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)  #to change the LD_LIBRARY_PATH and accept pcm
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+ROOT_GENERATE_DICTIONARY(EventDict Event.h LINKDEF EventLinkDef.h)
+#---Create a shared library with geneated dictionary
+add_library(Event SHARED Event.cxx EventDict.cxx)
+target_link_libraries(Event ${ROOT_LIBRARIES})
 
 file(GLOB HEADERS *.hh)
 file(GLOB SOURCES *.cc)
 
-add_executable(Transform ${SOURCES})
+add_executable(Transform ${SOURCES} Event.cxx)
 
-target_link_libraries(Transform ${ROOT_LIBRARIES})
+target_link_libraries(Transform ${ROOT_LIBRARIES} Event)

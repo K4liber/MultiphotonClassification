@@ -1,4 +1,5 @@
 #include "GlobalActorReader.hh"
+#include "Event.h"
 #include "calc.hh"
 #include "TCanvas.h"
 #include "TH1F.h"
@@ -11,6 +12,7 @@
 #include <string>
 #include <TRandom3.h>
 #include <random>
+#include <TTreeReader.h>
 
 using namespace std;
 
@@ -44,6 +46,104 @@ TH2 *hRecoEmissionPointAll = new TH2D(
     "hRecoEmissionPointAll", "hRecoEmissionPointAll", 1000, -5, 5, 1000, -5, 5);
 TH2 *pos = new TH2D("XY", "XY", 1200, -600, 600, 1200, -600, 600);
 bool createStats = false;
+
+void addEntryToEvent(const GlobalActorReader &gar, Event *outEvent) {
+  assert(outEvent);
+  outEvent->fEventID = gar.GetEventID();
+
+  TrackInteraction trkStep;
+  trkStep.fHitPosition = gar.GetProcessPosition();
+  trkStep.fVolumeCenter = gar.GetScintilatorPosition();
+  trkStep.fLocalTime = gar.GetLocalTime();
+  trkStep.fGlobalTime = gar.GetGlobalTime();
+  trkStep.fEnergyDeposition = gar.GetEnergyLossDuringProcess();
+  trkStep.fEnergyBeforeProcess = gar.GetEnergyBeforeProcess();
+  trkStep.fVolumeName = gar.GetVolumeName();
+
+  int currentTrackID = gar.GetTrackID();
+  if (!outEvent->fTracks.empty()) {
+    auto &lastTrack = outEvent->fTracks.back();
+    if (lastTrack.fTrackID == currentTrackID) {
+      lastTrack.fTrackInteractions.push_back(trkStep);
+    } else {
+      Track trk;
+      trk.fEmissionEnergy = gar.GetEmissionEnergyFromSource();
+      trk.fTrackID = currentTrackID;
+      trk.fTrackInteractions.push_back(trkStep);
+      outEvent->fTracks.push_back(trk);
+    }
+  } else {
+    Track trk;
+    trk.fEmissionEnergy = gar.GetEmissionEnergyFromSource();
+    trk.fTrackID = currentTrackID;
+    trk.fTrackInteractions.push_back(trkStep);
+    outEvent->fTracks.push_back(trk);
+  }
+}
+
+void clearEvent(Event *outEvent) {
+  assert(outEvent);
+  outEvent->fEventID = -1;
+  outEvent->fTracks.clear();
+}
+
+void transformToEventTree(const std::string &inFileName,
+                          const std::string &outFileName) {
+  TFile fileOut(outFileName.c_str(), "RECREATE");
+  TTree *tree = new TTree("Tree", "Tree");
+  Event *event = nullptr;
+  tree->Branch("Event", &event, 16000, 99);
+  try {
+    event = new Event;
+    GlobalActorReader gar;
+    if (gar.LoadFile(inFileName.c_str())) {
+      bool isNewEvent = false;
+      bool isFirstEvent = false;
+      auto previousID = event->fEventID;
+      auto currentID = previousID;
+      while (gar.Read()) {
+        currentID = gar.GetEventID();
+        isFirstEvent = (previousID < 0) && (currentID > 0);
+        isNewEvent = currentID != previousID;
+
+        if (isFirstEvent) {
+        addEntryToEvent(gar, event);
+        } else {
+          if (isNewEvent) {
+            tree->Fill();
+            clearEvent(event);
+          }
+          addEntryToEvent(gar, event);
+        }
+        previousID = currentID;
+      }
+      if (event->fEventID > 0) {
+        tree->Fill();
+        clearEvent(event);
+      }
+    } else {
+      std::cerr << "Loading file failed." << std::endl;
+    }
+  } catch (const std::logic_error &e) {
+    std::cerr << e.what() << std::endl;
+  } catch (...) {
+    std::cerr << "Udefined exception" << std::endl;
+  }
+  fileOut.cd();
+  assert(tree);
+  fileOut.Write();
+}
+
+void save2PhotonsEntry(gammaTrack &gt1, gammaTrack &gt2, bool isPPsEvent,
+               ofstream &outputFile) {
+  outputFile << gt1.eventID << "," << gt2.eventID << "," << gt1.trackID << ","
+             << gt2.trackID << "," << gt1.x << "," << gt1.y
+             << "," << gt1.z << "," << gt2.x << "," << gt2.y << "," << gt2.z
+             << "," << gt1.energy << "," << gt2.energy << ","
+             << gt1.globalTime - gt2.globalTime << "," << gt1.time << "," << gt2.time << ","
+             << gt1.volume << "," << gt2.volume << "," << int(isPPsEvent)
+             << endl;
+}
 
 void saveEntry(gammaTrack &gt1, gammaTrack &gt2, bool isPPsEvent,
                ofstream &outputFile) {
@@ -110,7 +210,6 @@ void createCSVFile() {
       bool areIntimeCut = (abs(it->globalTime - it2->globalTime) <= kTimeCut);
       bool areSameEvents = (it->eventID == it2->eventID);
       bool areDifferentTracks = (it->trackID != it2->trackID);
-      bool areSameLayers = (it->volume == it2->volume);
       if (!areIntimeCut) continue;
 
       if (createStats) {
@@ -120,7 +219,7 @@ void createCSVFile() {
         htimeDiff2->Fill(it->time - it2->time);
         hRecoEmissionPointAll->Fill(recoEPoint.X(), recoEPoint.Y());
       }
-      if (areSameEvents && areDifferentTracks && areSameLayers && it->pPs &&
+      if (areSameEvents && areDifferentTracks && it->pPs &&
           it2->pPs) {
         isPPsEvent = true;
         if (createStats) {
@@ -145,6 +244,46 @@ void createCSVFile() {
   outputFile.close();
 }
 
+/*
+***** Find and save clear pPs events *****
+*/
+void savePPsEvents(const std::string &inFile) {
+  cout<<"Extracting pPs events..."<<endl;
+  ofstream outputFile;
+  outputFile.open("data2.csv");
+  TFile file(inFile.c_str(), "READ");
+  TTreeReader reader("Tree", &file);
+  TTreeReaderValue<Event> event(reader, "Event");
+  double cut = 100;
+  double numberOfEvents = 0;
+  while (reader.Next()) {
+    // Process log
+    cout << "\r" << "Number of evaluated events: " << numberOfEvents++;
+    if (event->fTracks.size() == 2) {
+      auto &iterTrack1 = event->fTracks[0].fTrackInteractions.front();
+      auto &iterTrack2 = event->fTracks[1].fTrackInteractions.front();
+      if (iterTrack1.fEnergyDeposition > cut && iterTrack2.fEnergyDeposition > cut &&
+        iterTrack1.fEnergyBeforeProcess == 511 && iterTrack2.fEnergyBeforeProcess == 511) {
+        outputFile << iterTrack1.fVolumeCenter.X() << "," 
+          << iterTrack1.fVolumeCenter.Y() << ","
+          << smearZ(iterTrack1.fHitPosition.Z()) << "," 
+          << iterTrack2.fVolumeCenter.X() << "," 
+          << iterTrack2.fVolumeCenter.Y() << ","
+          << smearZ(iterTrack2.fHitPosition.Z()) << "," 
+          << smearEnergy(iterTrack1.fEnergyDeposition) << ","
+          << smearEnergy(iterTrack2.fEnergyDeposition) << ","
+          << iterTrack1.fGlobalTime - iterTrack2.fGlobalTime << "," 
+          << iterTrack1.fLocalTime << "," 
+          << iterTrack2.fLocalTime << ","
+          << iterTrack1.fVolumeName << "," 
+          << iterTrack1.fVolumeName << "," 
+          << 1 // This stands for pPs class
+          << endl;
+      }
+    }
+  }
+}
+
 int main(int argc, char *argv[]) {
   energySmearTest(1000000);
   timeSmearTest(1000000);
@@ -154,7 +293,9 @@ int main(int argc, char *argv[]) {
   } else {
     string file_name(argv[1]);
     createStats = argv[2];
-
+    string out_file_name = "out.root";
+    transformToEventTree(file_name, out_file_name);
+    savePPsEvents(out_file_name);
     try {
       GlobalActorReader gar;
 
