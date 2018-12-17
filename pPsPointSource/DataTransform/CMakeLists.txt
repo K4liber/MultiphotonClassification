@@ -67,6 +67,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)  #to change the LD_LIBRARY_PATH and 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 ROOT_GENERATE_DICTIONARY(EventDict Event.h LINKDEF EventLinkDef.h)
+ROOT_GENERATE_DICTIONARY(ClassExtractorDict ClassExtractor.h LINKDEF ClassExtractorLink.h)
 #---Create a shared library with geneated dictionary
 add_library(Event SHARED Event.cxx EventDict.cxx)
 target_link_libraries(Event ${ROOT_LIBRARIES})

@@ -15,7 +15,7 @@ Double_t r_norm(Double_t mean, double sigmaE)
   return d(gen);
 }
 
-Double_t sigmaE(Double_t E, Double_t coeff)
+Double_t sigmaE(Double_t E, Double_t coeff = 0.0444)
 {
   return coeff / TMath::Sqrt(E) * E;
 }

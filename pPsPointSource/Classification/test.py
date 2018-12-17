@@ -14,5 +14,7 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(dist1, 0)
         self.assertEqual(dist2, 2)
 
+    
+
 if __name__ == '__main__':
     unittest.main()

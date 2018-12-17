@@ -1,5 +1,7 @@
 #include "GlobalActorReader.hh"
+#include "ClassExtractor.hh"
 #include "Event.h"
+#include "ClassExtractor.hh"
 #include "calc.hh"
 #include "TCanvas.h"
 #include "TH1F.h"
@@ -134,17 +136,6 @@ void transformToEventTree(const std::string &inFileName,
   fileOut.Write();
 }
 
-void save2PhotonsEntry(gammaTrack &gt1, gammaTrack &gt2, bool isPPsEvent,
-               ofstream &outputFile) {
-  outputFile << gt1.eventID << "," << gt2.eventID << "," << gt1.trackID << ","
-             << gt2.trackID << "," << gt1.x << "," << gt1.y
-             << "," << gt1.z << "," << gt2.x << "," << gt2.y << "," << gt2.z
-             << "," << gt1.energy << "," << gt2.energy << ","
-             << gt1.globalTime - gt2.globalTime << "," << gt1.time << "," << gt2.time << ","
-             << gt1.volume << "," << gt2.volume << "," << int(isPPsEvent)
-             << endl;
-}
-
 void saveEntry(gammaTrack &gt1, gammaTrack &gt2, bool isPPsEvent,
                ofstream &outputFile) {
   outputFile << gt1.eventID << "," << gt2.eventID << "," << gt1.trackID << ","
@@ -244,50 +235,10 @@ void createCSVFile() {
   outputFile.close();
 }
 
-/*
-***** Find and save clear pPs events *****
-*/
-void savePPsEvents(const std::string &inFile) {
-  cout<<"Extracting pPs events..."<<endl;
-  ofstream outputFile;
-  outputFile.open("data2.csv");
-  TFile file(inFile.c_str(), "READ");
-  TTreeReader reader("Tree", &file);
-  TTreeReaderValue<Event> event(reader, "Event");
-  double cut = 100;
-  double numberOfEvents = 0;
-  while (reader.Next()) {
-    // Process log
-    cout << "\r" << "Number of evaluated events: " << numberOfEvents++;
-    if (event->fTracks.size() == 2) {
-      auto &iterTrack1 = event->fTracks[0].fTrackInteractions.front();
-      auto &iterTrack2 = event->fTracks[1].fTrackInteractions.front();
-      if (iterTrack1.fEnergyDeposition > cut && iterTrack2.fEnergyDeposition > cut &&
-        iterTrack1.fEnergyBeforeProcess == 511 && iterTrack2.fEnergyBeforeProcess == 511) {
-        outputFile << iterTrack1.fVolumeCenter.X() << "," 
-          << iterTrack1.fVolumeCenter.Y() << ","
-          << smearZ(iterTrack1.fHitPosition.Z()) << "," 
-          << iterTrack2.fVolumeCenter.X() << "," 
-          << iterTrack2.fVolumeCenter.Y() << ","
-          << smearZ(iterTrack2.fHitPosition.Z()) << "," 
-          << smearEnergy(iterTrack1.fEnergyDeposition) << ","
-          << smearEnergy(iterTrack2.fEnergyDeposition) << ","
-          << iterTrack1.fGlobalTime - iterTrack2.fGlobalTime << "," 
-          << iterTrack1.fLocalTime << "," 
-          << iterTrack2.fLocalTime << ","
-          << iterTrack1.fVolumeName << "," 
-          << iterTrack1.fVolumeName << "," 
-          << 1 // This stands for pPs class
-          << endl;
-      }
-    }
-  }
-}
-
 int main(int argc, char *argv[]) {
-  energySmearTest(1000000);
-  timeSmearTest(1000000);
-  zSmearTest(1000000);
+  //energySmearTest(1000000);
+  //timeSmearTest(1000000);
+  //zSmearTest(1000000);
   if (argc < 4) {
     cerr << "Invalid number of variables." << endl;
   } else {
@@ -295,7 +246,8 @@ int main(int argc, char *argv[]) {
     createStats = argv[2];
     string out_file_name = "out.root";
     transformToEventTree(file_name, out_file_name);
-    savePPsEvents(out_file_name);
+    ClassExtractor* classExtractor = new ClassExtractor(out_file_name);
+    classExtractor->extractTwoPhotonsEvents("extractedData.csv", false);
     try {
       GlobalActorReader gar;
 

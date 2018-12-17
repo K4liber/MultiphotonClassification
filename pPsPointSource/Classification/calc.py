@@ -8,8 +8,8 @@ from sklearn.metrics import roc_curve, auc
 
 sOfL = 300 # mm/ns
 names = [
-    "EventID1", "EventID2", "TrackID1", "TrackID2", "x1", "y1", "z1", "x2", "y2", "z2",
-    "e1", "e2", "dt", "t1", "t2", "vol1", "vol2", "pPs"
+    "x1", "y1", "z1", "x2", "y2", "z2",
+    "e1", "e2", "t1", "t2", "vol1", "vol2", "pPs"
 ]
 
 def emissionPoint(row):
@@ -46,6 +46,7 @@ def energySum(row):
 def loadDataFrames(filename):
     codes = {'detector1':1, 'detector2':2, 'detector3':3}
     df = pd.read_csv(filename, names = names)
+    df['dt'] = df['t1'] - df['t2']
     df['dist'] = df.apply(lambda row: centerDistance(row),axis=1)
     df['energySum'] = df.apply(lambda row: energySum(row),axis=1)
     df['vol1'] = df['vol1'].map(codes)
@@ -54,8 +55,6 @@ def loadDataFrames(filename):
     y = df[["pPs"]]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
     X_test_with_times = X_test.copy()
-    X_train.drop(['t1', 't2', "EventID1", "EventID2", "TrackID1", "TrackID2"], axis=1, inplace=True)
-    X_test.drop(['t1', 't2', "EventID1", "EventID2", "TrackID1", "TrackID2"], axis=1, inplace=True)
     return df, X_train, X_test, y_train, y_test, X_test_with_times
 
 def reconstruction(FP, TP, TN, FN):
@@ -177,20 +176,16 @@ def saveHistograms(X_test_with_times, y_test, y_pred, modelName):
 
     reconstruction(FP, TP, TN, FN)
 
-    FPStatsFrame = FP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
-                        .drop_duplicates()
+    FPStatsFrame = FP[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
     createHistograms(FPStatsFrame, modelName + '-False Positive')
 
-    TPStatsFrame = TP[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
-                        .drop_duplicates()
+    TPStatsFrame = TP[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
     createHistograms(TPStatsFrame, modelName + '-True Positive')
 
-    TNStatsFrame = TN[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
-                        .drop_duplicates()
+    TNStatsFrame = TN[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
     createHistograms(TNStatsFrame, modelName + '-True Negative')
 
-    FNStatsFrame = FN[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
-                        .drop_duplicates()
+    FNStatsFrame = FN[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
     createHistograms(FNStatsFrame, modelName + '-False Negative')
 
 def plot_confusion_matrix(cm, classes, modelName, accuracy, cmap=plt.cm.Blues):

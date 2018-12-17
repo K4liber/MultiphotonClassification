@@ -1,7 +1,7 @@
 #include "TVector3.h"
 
 Double_t r_norm(Double_t mean, double sigmaE);
-Double_t sigmaE(Double_t E, Double_t coeff = 0.0444);
+Double_t sigmaE(Double_t E, Double_t coeff);
 Double_t smearEnergy(Double_t energy);
 Double_t smearTime(Double_t time);
 Double_t smearZ(Double_t z);

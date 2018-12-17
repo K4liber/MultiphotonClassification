@@ -30,7 +30,7 @@ class TrainCallback(Callback):
 def buildNN():
     model = Sequential()
     model.add(
-        Dense(output_dim = 14, init = 'uniform', activation = 'relu', input_dim = 13)
+        Dense(output_dim = 14, init = 'uniform', activation = 'relu', input_dim = 15)
     )
     model.add(
         Dense(output_dim = 10, init = 'uniform', activation = 'relu')
@@ -49,12 +49,12 @@ def buildNN():
 
 # Load and transform data into sets 
 df, X_train, X_test, y_train, y_test, X_test_with_times = loadDataFrames('data.csv')
-
+print(df.head())
 classifier = buildNN()
 
 trainCallback = TrainCallback((X_train, y_train))
 # Fitting our model 
-obj = classifier.fit(X_train, y_train, batch_size = 16, nb_epoch = 30, 
+obj = classifier.fit(X_train, y_train, batch_size = 16, nb_epoch = 10, 
     callbacks=[trainCallback])
 
 # Predicting the Test set results
@@ -70,6 +70,8 @@ cmTest = confusion_matrix(y_test, y_pred)
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy: %.2f%%" % (accuracy * 100.0))
 print("Accuracy (train): %.2f%%" % (trainCallback.acc * 100.0))
+
+'''
 plot_confusion_matrix(cmTest, classes=['not pPs', 'pPs'],
     modelName='NN-test',
     accuracy='Accuracy: ' + '%.2f' % (accuracy * 100.0) + 
@@ -80,22 +82,18 @@ plot_confusion_matrix(trainCallback.cm, classes=['not pPs', 'pPs'],
     accuracy='Accuracy: ' + '%.2f' % (trainCallback.acc * 100.0) + 
     "%, size: " + str(y_train.size)
 )
+'''
 
 # Stats for all particles considered
-allStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
-                    .drop_duplicates()
+# allStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]].drop_duplicates()
 # createHistograms(allStatsFrame, 'all')
 
 # Stats for pPs events
-pPsStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
-                    .loc[df['pPs'] == 1] \
-                    .drop_duplicates()
+# pPsStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]].loc[df['pPs'] == 1].drop_duplicates()
 # createHistograms(pPsStatsFrame, 'pPs')
 
 # Stats for not pPs events
-notpPsStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]] \
-                    .loc[df['pPs'] == 0] \
-                    .drop_duplicates()
+# notpPsStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]].loc[df['pPs'] == 0].drop_duplicates()
 # createHistograms(notpPsStatsFrame, 'notpPs')
 
-# saveHistograms(X_test_with_times, y_test.values, y_pred, "NN")
+saveHistograms(X_test_with_times, y_test.values, y_pred, "NN")
