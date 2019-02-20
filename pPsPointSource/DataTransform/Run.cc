@@ -10,6 +10,7 @@
 #include <TLorentzVector.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <stdlib.h>
 #include <string>
 #include <TRandom3.h>
@@ -18,8 +19,9 @@
 
 using namespace std;
 
-const int energyCut = 100; // keV
-const bool doSmear = true;
+int energyCut = 100; // keV
+bool createStats = false;
+bool smear = true;
 
 struct gammaTrack {
   int eventID;
@@ -47,7 +49,6 @@ TH2 *hRecoEmissionPointTrue =
 TH2 *hRecoEmissionPointAll = new TH2D(
     "hRecoEmissionPointAll", "hRecoEmissionPointAll", 1000, -5, 5, 1000, -5, 5);
 TH2 *pos = new TH2D("XY", "XY", 1200, -600, 600, 1200, -600, 600);
-bool createStats = false;
 
 void addEntryToEvent(const GlobalActorReader &gar, Event *outEvent) {
   assert(outEvent);
@@ -150,14 +151,14 @@ void saveEntry(gammaTrack &gt1, gammaTrack &gt2, bool isPPsEvent,
 void readEntry(const GlobalActorReader &gar) {
   // Energy cut - eletronic noise
   Double_t energy = gar.GetEnergyLossDuringProcess();
-  if (doSmear) energy = smearEnergy(energy);
+  if (smear) energy = smearEnergy(energy);
   if (energy > energyCut) {
     TVector3 hitPosition = gar.GetProcessPosition();
     Double_t x = hitPosition.X();
     Double_t y = hitPosition.Y();
     Double_t z = hitPosition.Z();
     Double_t globalTime = gar.GetGlobalTime();
-    if (doSmear) {
+    if (smear) {
       auto scintPosition = gar.GetScintilatorPosition();
       x = scintPosition.X();
       y = scintPosition.Y();
@@ -236,18 +237,23 @@ void createCSVFile() {
 }
 
 int main(int argc, char *argv[]) {
-  //energySmearTest(1000000);
-  //timeSmearTest(1000000);
-  //zSmearTest(1000000);
   if (argc < 4) {
     cerr << "Invalid number of variables." << endl;
   } else {
+    // Handling parameters
     string file_name(argv[1]);
-    createStats = argv[2];
+    energyCut = atoi(argv[2]);
+    std::stringstream ss(argv[3]);
+    if(!(ss >> std::boolalpha >> smear)) {
+        cerr << "As smear type true or false." << endl;
+        return 1;
+    }
+
     string out_file_name = "out.root";
     transformToEventTree(file_name, out_file_name);
-    ClassExtractor* classExtractor = new ClassExtractor(out_file_name);
-    classExtractor->extractTwoPhotonsEvents("extractedData.csv", false);
+    ClassExtractor* classExtractor = new ClassExtractor(out_file_name, smear, energyCut);
+    classExtractor->extractTwoPhotonsEvents("extractedData.csv");
+    /*
     try {
       GlobalActorReader gar;
 
@@ -262,7 +268,7 @@ int main(int argc, char *argv[]) {
       } else {
         cerr << "Loading file failed." << endl;
       }
-      createCSVFile();
+      //createCSVFile();
       if (createStats) {
         // Time differences
         TCanvas c1("c", "c", 2000, 2000);
@@ -298,6 +304,7 @@ int main(int argc, char *argv[]) {
     } catch (...) {
       cerr << "Udefined exception" << endl;
     }
+    */
   }
   return 0;
 }

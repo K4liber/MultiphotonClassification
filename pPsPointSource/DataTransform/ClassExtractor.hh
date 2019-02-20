@@ -27,11 +27,14 @@
 
 class ClassExtractor{
     public:
-        ClassExtractor(std::string &inFileName);
-        void extractTwoPhotonsEvents(std::string outFileName, bool smear);
+        ClassExtractor(std::string &inFileName, bool smear, float cut);
+        void extractTwoPhotonsEvents(std::string outFileName);
+        void setInFileName(std::string &inFileName);
     private:
         std::string inFileName;
-        void setInFileName(std::string &inFileName);
+        bool smear;
+        float cut;
+        void saveToFile(std::ofstream& outputFile, TrackInteraction& i1, TrackInteraction& i2, int cl);
 };
 
 #endif /*  !CLASSEXTRACTOR_H */

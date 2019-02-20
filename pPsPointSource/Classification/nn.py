@@ -30,10 +30,7 @@ class TrainCallback(Callback):
 def buildNN():
     model = Sequential()
     model.add(
-        Dense(output_dim = 14, init = 'uniform', activation = 'relu', input_dim = 15)
-    )
-    model.add(
-        Dense(output_dim = 10, init = 'uniform', activation = 'relu')
+        Dense(output_dim = 15, init = 'uniform', activation = 'relu', input_dim = 13)
     )
     model.add(
         Dense(output_dim = 8, init = 'uniform', activation = 'relu')
@@ -43,18 +40,18 @@ def buildNN():
     )
     sgd = keras.optimizers.SGD(lr=0.05, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(
-        optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy']
+        optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['mean_absolute_error']
     )
     return model
 
 # Load and transform data into sets 
 df, X_train, X_test, y_train, y_test, X_test_with_times = loadDataFrames('data.csv')
-print(df.head())
+print(X_train.head())
 classifier = buildNN()
 
 trainCallback = TrainCallback((X_train, y_train))
 # Fitting our model 
-obj = classifier.fit(X_train, y_train, batch_size = 16, nb_epoch = 10, 
+obj = classifier.fit(X_train, y_train, batch_size = 8, nb_epoch = 100, 
     callbacks=[trainCallback])
 
 # Predicting the Test set results
@@ -71,7 +68,7 @@ accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy: %.2f%%" % (accuracy * 100.0))
 print("Accuracy (train): %.2f%%" % (trainCallback.acc * 100.0))
 
-'''
+
 plot_confusion_matrix(cmTest, classes=['not pPs', 'pPs'],
     modelName='NN-test',
     accuracy='Accuracy: ' + '%.2f' % (accuracy * 100.0) + 
@@ -82,7 +79,7 @@ plot_confusion_matrix(trainCallback.cm, classes=['not pPs', 'pPs'],
     accuracy='Accuracy: ' + '%.2f' % (trainCallback.acc * 100.0) + 
     "%, size: " + str(y_train.size)
 )
-'''
+
 
 # Stats for all particles considered
 # allStatsFrame = df[["EventID1","TrackID1","e1","x1", "y1", "z1", "dt"]].drop_duplicates()

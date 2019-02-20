@@ -40,12 +40,13 @@ def buildNN():
 # Load and transform data into sets 
 directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
-df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName)
+df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 10000000)
+
 classifier = buildNN()
 
 trainCallback = TrainCallback((X_train, y_train))
 # Fitting our model 
-obj = classifier.fit(X_train, y_train, batch_size = 32, nb_epoch = 2, 
+obj = classifier.fit(X_train, y_train, batch_size = 32, nb_epoch = 3, 
     callbacks=[trainCallback])
 
 # Predicting the Test set results
@@ -73,4 +74,16 @@ plot_confusion_matrix(trainCallback.cm, classes=['not pPs', 'pPs'],
     "%, size: " + str(y_train.size)
 )
 
-saveHistograms(X_test, y_test.values, y_pred, "NN")
+# Save histograms with stats
+pPsOrginalPositive = X_test[y_test.values > 0]
+pPsOrginalNegative = X_test[y_test.values == 0]
+pPsPredictedPositive = X_test[y_pred]
+pPsPredictedNegative = X_test[y_pred == 0]
+
+FP = pd.merge(pPsPredictedPositive,pPsOrginalNegative, how='inner')
+TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
+TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
+FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
+
+saveHistograms(FP, TP, TN, FN, "NN")
+reconstructionTest2D(FP, TP, title = 'IEC - NN test recostrucion (TP + FP)')

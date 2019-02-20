@@ -8,8 +8,8 @@ from sklearn.metrics import roc_curve, auc
 
 sOfL = 300 # mm/ns
 names = [
-    "x1", "y1", "z1", "x2", "y2", "z2",
-    "e1", "e2", "t1", "t2", "vol1", "vol2", "pPs"
+    "evID1", "evID2", "trID1", "trID2", "x1", "y1", "z1", "x2", "y2", "z2",
+    "e1", "e2", "dt", "t1", "t2", "vol1", "vol2", "pPs"
 ]
 
 def emissionPoint(row):
@@ -45,13 +45,14 @@ def energySum(row):
 
 def loadDataFrames(filename):
     codes = {'detector1':1, 'detector2':2, 'detector3':3}
+    # codes = {'box_with_water':1, 'crystal1':2, 'crystal2':3, 'crystal3':4}
     df = pd.read_csv(filename, names = names)
     df['dt'] = df['t1'] - df['t2']
     df['dist'] = df.apply(lambda row: centerDistance(row),axis=1)
     df['energySum'] = df.apply(lambda row: energySum(row),axis=1)
     df['vol1'] = df['vol1'].map(codes)
     df['vol2'] = df['vol2'].map(codes)
-    X = df.drop(['pPs'], axis=1)
+    X = df.drop(["pPs", "evID1", "evID2", "trID1", "trID2", "t1", "t2"], axis=1)
     y = df[["pPs"]]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
     X_test_with_times = X_test.copy()
@@ -99,7 +100,7 @@ def reconstruction(FP, TP, TN, FN):
 
 def createHistograms(df, name):
     plt.figure()
-    plt.hist(df[["e1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
+    plt.hist(df[["e1"]].transpose(), bins=40, edgecolor='k', alpha=0.7)
     e1Mean = df["e1"].mean()
     plt.axvline(e1Mean, color='k', linestyle='dashed', linewidth=1)
     _, max_ = plt.ylim()

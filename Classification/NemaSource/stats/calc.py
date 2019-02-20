@@ -26,8 +26,8 @@ dataFrameNames = [
     "sZ1" # 1 gamma emission z position [cm]
 ]
 
-def createLearningBatches(fileName):
-    df = pd.read_csv(fileName, sep = "\t", names = dataFrameNames)
+def createLearningBatches(fileName, size):
+    df = pd.read_csv(fileName, sep = "\t", names = dataFrameNames).head(size)
     df["dt"] = df["t1"] - df["t2"]
     codes = {1:1, 2:0, 3:0, 4:0}
     df["class"] = df["class"].map(codes)
@@ -105,7 +105,7 @@ def reconstruction(df):
     plt.title('NEMA - JPET simulation recostrucion')
     plt.show()
 
-def reconstructionTest(FP, TP):
+def reconstructionTest3D(FP, TP):
     fig1 = plt.figure()
     ax = fig1.add_subplot(111, projection='3d')
 
@@ -128,6 +128,26 @@ def reconstructionTest(FP, TP):
     ax.set_zlabel('z [cm]')
     ax.legend(loc='lower left')
     plt.title('JPET NEMA - NN test recostrucion')
+    plt.show()
+
+def reconstructionTest2D(FP, TP, title):
+    points = pd.DataFrame(columns=['X', 'Y'])
+
+    for index, row in TP.iterrows():
+        point = emissionPoint(row)
+        points = points.append({'X': point['x'], 'Y': point['y']}, ignore_index = True)
+
+    for index, row in FP.iterrows():
+        point = emissionPoint(row)
+        points = points.append({'X': point['x'], 'Y': point['y']}, ignore_index = True)
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
+    plt.hist2d(points["X"], points["Y"], bins=(200, 200), cmap = plt.cm.jet)
+    plt.colorbar()
+    ax.set_xlabel('x [cm]')
+    ax.set_ylabel('y [cm]')
+    plt.title(title)
     plt.show()
 
 def plot_confusion_matrix(cm, classes, modelName, accuracy, cmap=plt.cm.Blues):
@@ -168,17 +188,7 @@ def createROC(modelName, y, y_pred):
     plt.legend(loc='best')
     plt.savefig(modelName + '-ROC.png')
 
-def saveHistograms(X_test, y_test, y_pred, modelName):
-    pPsOrginalPositive = X_test[y_test > 0]
-    pPsOrginalNegative = X_test[y_test == 0]
-    pPsPredictedPositive = X_test[y_pred]
-    pPsPredictedNegative = X_test[y_pred == 0]
-
-    FP = pd.merge(pPsPredictedPositive,pPsOrginalNegative, how='inner')
-    TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
-    TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
-    FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
-
+def saveHistograms(FP, TP, TN, FN, modelName):
     FPStatsFrame = FP[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
     createStats(FPStatsFrame, modelName + '-False Positive')
 
@@ -190,5 +200,3 @@ def saveHistograms(X_test, y_test, y_pred, modelName):
 
     FNStatsFrame = FN[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
     createStats(FNStatsFrame, modelName + '-False Negative')
-
-    reconstructionTest(FP.head(30000), TP.head(30000))
