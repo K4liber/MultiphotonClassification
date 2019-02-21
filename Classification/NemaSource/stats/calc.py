@@ -148,7 +148,8 @@ def reconstructionTest2D(FP, TP, title):
     ax.set_xlabel('x [cm]')
     ax.set_ylabel('y [cm]')
     plt.title(title)
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(title + 'reconstruction2D.png')
 
 def plot_confusion_matrix(cm, classes, modelName, accuracy, cmap=plt.cm.Blues):
     plt.clf()
