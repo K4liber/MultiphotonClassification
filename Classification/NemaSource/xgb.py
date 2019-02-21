@@ -19,14 +19,18 @@ y_train = np.ravel(y_train)
 y_test = np.ravel(y_test)
 
 # fit model on training data
-model = XGBClassifier(objective = 'binary:logistic')
+model = XGBClassifier(
+    objective = 'binary:logistic', # logistic regression for binary classification, output probability
+    booster = 'gbtree'
+)
+
 param_dist = {
-    'n_estimators': stats.randint(300, 600),
-    'learning_rate': stats.uniform(0.05, 0.1),
-    'subsample': stats.uniform(0.6, 0.1),
-    'max_depth': [5, 6, 7, 8, 9, 10, 11],
-    'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1],
-    'min_child_weight': [1, 2, 3, 4]
+    'n_estimators': stats.randint(50, 200), # Number of trees in each classifier
+    'learning_rate': stats.uniform(0.15, 0.05),
+    'subsample': stats.uniform(0.6, 0.1), # Percentage of the training samples used to train
+    'max_depth': [5, 6, 7, 8, 9, 10, 11], 
+    'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1], 
+    'min_child_weight': [1, 2, 3, 4] 
 }
 
 clf = RandomizedSearchCV(
