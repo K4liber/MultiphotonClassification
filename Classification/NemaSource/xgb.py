@@ -23,14 +23,14 @@ y_test = np.ravel(y_test)
 # fit model on training data
 model = XGBClassifier(
     objective = 'binary:logistic', # Logistic regression for binary classification, output probability
-    booster = 'gbtree' # Set estimator as gradient boosting tree
+    booster = 'gbtree', # Set estimator as gradient boosting tree
+    subsample = 1, # Percentage of the training samples used to train (consider this)
 )
 
 param_dist = {
     'n_estimators': stats.randint(50, 200), # Number of trees in each classifier
     'learning_rate': stats.uniform(0.15, 0.05), # Contribution of each estimator
-    'subsample': stats.uniform(0.6, 0.1), # Percentage of the training samples used to train (consider this)
-    'max_depth': [5, 6, 7, 8, 9, 10, 11], # Maximum depth of a tree
+    'max_depth': [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], # Maximum depth of a tree
     'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1], # The fraction of columns to be subsampled
     'min_child_weight': [1, 2, 3, 4]    # Minimum sum of instance weight (hessian) needed in a child 8
                                         # In linear regression task, this simply corresponds to minimum 
@@ -38,9 +38,9 @@ param_dist = {
 }
 
 clf = RandomizedSearchCV(
-    model, 
+    model,
     param_distributions = param_dist,  
-    n_iter = 5, 
+    n_iter = 20, 
     cv = 3, # Cross-validation number of folds
     scoring = 'roc_auc', 
     error_score = 0, 
@@ -86,8 +86,9 @@ plot_confusion_matrix(
     modelName = modelName
 )
 
-# save model to file
+# save best model and all results to file
 pickle.dump(clf.best_estimator_, open(modelName + "/bestXGB.dat", "wb"))
+pickle.dump(clf.cv_results_, open(modelName + "/CVresults.dat", "wb"))
 # plot single tree
 fig = plt.figure()
 fig.set_size_inches(3600, 2400)

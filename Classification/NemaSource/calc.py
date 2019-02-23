@@ -248,7 +248,7 @@ def angleVsTime(FP, TP, TN, FN, modelName):
     plotAngleVsTime(TP, modelName + '-TP', modelName = modelName)
     plotAngleVsTime(TN, modelName + '-TN', modelName = modelName)
     plotAngleVsTime(FN, modelName + '-FN', modelName = modelName)
-    plotMixedAngleVsTime(TP, FP, modelName, modelName = "stats")
+    plotMixedAngleVsTime(TP, FP, name = "XGB", modelName = modelName)
 
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
