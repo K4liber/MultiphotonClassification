@@ -36,41 +36,41 @@ def createLearningBatches(fileName, size):
     xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.2)
     return df, xTrain, xTest, yTrain, yTest
 
-def createStats(df, name):
+def createStats(df, name, modelName):
     plt.figure()
     plt.hist(df[["e1"]].transpose(), bins=40, edgecolor='k', alpha=0.7)
     plt.title('Energy loss - ' + name)
     plt.xlabel('Energy [keV]')
     plt.ylabel('#')
-    plt.savefig(name + 'Energy.png')
+    plt.savefig(modelName + "/" + name + 'Energy.png')
 
     plt.figure()
     plt.hist(df[["dt"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
     plt.title('Detection time difference - ' + name)
     plt.xlabel('time difference [us]')
     plt.ylabel('#')
-    plt.savefig(name + 'Time.png')
+    plt.savefig(modelName + "/" + name + 'Time.png')
 
     plt.figure()
     plt.hist(df[["x1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
     plt.title('X position - ' + name)
     plt.xlabel('Position [cm]')
     plt.ylabel('#')
-    plt.savefig(name + 'X.png')
+    plt.savefig(modelName + "/" + name + 'X.png')
  
     plt.figure()
     plt.hist(df[["y1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
     plt.title('Y position - ' + name)
     plt.xlabel('Position [cm]')
     plt.ylabel('#')
-    plt.savefig(name + 'Y.png')
+    plt.savefig(modelName + "/" + name + 'Y.png')
   
     plt.figure()
     plt.hist(df[["z1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
     plt.title('Z position - ' + name)
     plt.xlabel('Position [cm]')
     plt.ylabel('#')
-    plt.savefig(name + 'Z.png')
+    plt.savefig(modelName + "/" + name + 'Z.png')
 
 def emissionPoint(row):
     sOfL = 0.03 # cm/ps
@@ -130,7 +130,7 @@ def reconstructionTest3D(FP, TP):
     plt.title('JPET NEMA - NN test recostrucion')
     plt.show()
 
-def reconstructionTest2D(FP, TP, title):
+def reconstructionTest2D(FP, TP, title, modelName):
     points = pd.DataFrame(columns=['X', 'Y'])
 
     for index, row in TP.iterrows():
@@ -149,9 +149,9 @@ def reconstructionTest2D(FP, TP, title):
     ax.set_ylabel('y [cm]')
     plt.title(title)
     plt.tight_layout()
-    plt.savefig(title + 'reconstruction2D.png')
+    plt.savefig(modelName + "/" + modelName + '-IECreconstruction2D.png')
 
-def plot_confusion_matrix(cm, classes, modelName, accuracy, cmap=plt.cm.Blues):
+def plot_confusion_matrix(cm, classes, title, accuracy, modelName, cmap=plt.cm.Blues):
     plt.clf()
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(
@@ -175,9 +175,9 @@ def plot_confusion_matrix(cm, classes, modelName, accuracy, cmap=plt.cm.Blues):
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
     plt.tight_layout()
-    plt.savefig(modelName + 'confMatrix.png')
+    plt.savefig(modelName + "/" + title + 'confMatrix.png')
 
-def createROC(modelName, y, y_pred):
+def createROC(title, y, y_pred, modelName):
     fpr_keras, tpr_keras, _ = roc_curve(y, y_pred)
     auc_keras = auc(fpr_keras, tpr_keras)
     plt.clf()
@@ -185,19 +185,80 @@ def createROC(modelName, y, y_pred):
     plt.plot(fpr_keras, tpr_keras, label='AUC = {:.3f}'.format(auc_keras))
     plt.xlabel('False positive rate')
     plt.ylabel('True positive rate')
-    plt.title(modelName + '-ROC')
+    plt.title(title + '-ROC')
     plt.legend(loc='best')
-    plt.savefig(modelName + '-ROC.png')
+    plt.savefig(modelName + "/" + title + '-ROC.png')
 
 def saveHistograms(FP, TP, TN, FN, modelName):
     FPStatsFrame = FP[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
-    createStats(FPStatsFrame, modelName + '-False Positive')
+    createStats(FPStatsFrame, modelName + '-False Positive', modelName = modelName)
 
     TPStatsFrame = TP[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
-    createStats(TPStatsFrame, modelName + '-True Positive')
+    createStats(TPStatsFrame, modelName + '-True Positive', modelName = modelName)
 
     TNStatsFrame = TN[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
-    createStats(TNStatsFrame, modelName + '-True Negative')
+    createStats(TNStatsFrame, modelName + '-True Negative', modelName = modelName)
 
     FNStatsFrame = FN[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
-    createStats(FNStatsFrame, modelName + '-False Negative')
+    createStats(FNStatsFrame, modelName + '-False Negative', modelName = modelName)
+
+def plotAngleVsTime(Data, name, modelName):
+    points = pd.DataFrame(columns = ['dt', 'alpha'])
+    fig = plt.figure(figsize = (8,6))
+    ax = fig.add_subplot(111)
+
+    for i, r in Data.iterrows():
+        cos = (r['x1']*r['x2']+r['y1']*r['y2']+r['z1']*r['z2'])/ \
+            (math.sqrt(r['x1']**2+r['y1']**2+r['z1']**2)*math.sqrt(r['x2']**2+r['y2']**2+r['z2']**2))
+        points = points.append({'dt': r['dt'], 'alpha': math.degrees(math.acos(cos))}, ignore_index = True)
+    
+    plt.hist2d(points['dt'], points['alpha'], bins = (200, 200), cmap = plt.cm.jet)
+    plt.colorbar()
+    ax.set_xlabel('dt [ps]')
+    ax.set_ylabel('alpha')
+    plt.title(name)
+    plt.tight_layout()
+    plt.savefig(modelName + "/" + name + '-angleVsTime.png')
+
+def plotMixedAngleVsTime(Data1, Data2, name, modelName):
+    points = pd.DataFrame(columns = ['dt', 'alpha'])
+    fig = plt.figure(figsize = (8,6))
+    ax = fig.add_subplot(111)
+
+    for i, r in Data1.iterrows():
+        cos = (r['x1']*r['x2']+r['y1']*r['y2']+r['z1']*r['z2'])/ \
+            (math.sqrt(r['x1']**2+r['y1']**2+r['z1']**2)*math.sqrt(r['x2']**2+r['y2']**2+r['z2']**2))
+        points = points.append({'dt': r['dt'], 'alpha': math.degrees(math.acos(cos))}, ignore_index = True)
+
+    for i, r in Data2.iterrows():
+        cos = (r['x1']*r['x2']+r['y1']*r['y2']+r['z1']*r['z2'])/ \
+            (math.sqrt(r['x1']**2+r['y1']**2+r['z1']**2)*math.sqrt(r['x2']**2+r['y2']**2+r['z2']**2))
+        points = points.append({'dt': r['dt'], 'alpha': math.degrees(math.acos(cos))}, ignore_index = True)
+    
+    plt.hist2d(points['dt'], points['alpha'], bins = (200, 200), cmap = plt.cm.jet)
+    plt.colorbar()
+    ax.set_xlabel('dt [ps]')
+    ax.set_ylabel('alpha')
+    plt.title(name)
+    plt.tight_layout()
+    plt.savefig(modelName + "/" + name + '-angleVsTime.png')
+
+def angleVsTime(FP, TP, TN, FN, modelName):
+    plotAngleVsTime(FP, modelName + '-FP', modelName = modelName)
+    plotAngleVsTime(TP, modelName + '-TP', modelName = modelName)
+    plotAngleVsTime(TN, modelName + '-TN', modelName = modelName)
+    plotAngleVsTime(FN, modelName + '-FN', modelName = modelName)
+    plotMixedAngleVsTime(TP, FP, modelName, modelName = "stats")
+
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
+
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(mypath)
+    except OSError as exc: # Python >2.5
+        if exc.errno == EEXIST and path.isdir(mypath):
+            pass
+        else: raise

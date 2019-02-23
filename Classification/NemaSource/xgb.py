@@ -2,7 +2,7 @@ import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from stats.calc import *
+from calc import *
 from sklearn.model_selection import RandomizedSearchCV
 from scipy import stats
 import numpy as np
@@ -11,32 +11,37 @@ from xgboost import plot_tree
 from sklearn.metrics import confusion_matrix
 import pickle
 
+modelName = "XGB10e7"
+mkdir_p(modelName)
 # Load and transform data into sets 
 directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
-df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 10000000)
+df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 1000)
 y_train = np.ravel(y_train)
 y_test = np.ravel(y_test)
 
 # fit model on training data
 model = XGBClassifier(
-    objective = 'binary:logistic', # logistic regression for binary classification, output probability
-    booster = 'gbtree'
+    objective = 'binary:logistic', # Logistic regression for binary classification, output probability
+    booster = 'gbtree' # Set estimator as gradient boosting tree
 )
 
 param_dist = {
     'n_estimators': stats.randint(50, 200), # Number of trees in each classifier
-    'learning_rate': stats.uniform(0.15, 0.05),
-    'subsample': stats.uniform(0.6, 0.1), # Percentage of the training samples used to train
-    'max_depth': [5, 6, 7, 8, 9, 10, 11], 
-    'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1], 
-    'min_child_weight': [1, 2, 3, 4] 
+    'learning_rate': stats.uniform(0.15, 0.05), # Contribution of each estimator
+    'subsample': stats.uniform(0.6, 0.1), # Percentage of the training samples used to train (consider this)
+    'max_depth': [5, 6, 7, 8, 9, 10, 11], # Maximum depth of a tree
+    'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1], # The fraction of columns to be subsampled
+    'min_child_weight': [1, 2, 3, 4]    # Minimum sum of instance weight (hessian) needed in a child 8
+                                        # In linear regression task, this simply corresponds to minimum 
+                                        # number of instances needed to be in each node
 }
 
 clf = RandomizedSearchCV(
     model, 
     param_distributions = param_dist,  
-    n_iter = 5,
+    n_iter = 5, 
+    cv = 3, # Cross-validation number of folds
     scoring = 'roc_auc', 
     error_score = 0, 
     verbose = 2, 
@@ -54,8 +59,8 @@ y_pred_values_train = clf.predict(X_train)
 y_pred_train = (y_pred_values_train > 0.5)
 
 # Create ROC curves
-createROC('XGB-train', y_train, y_pred_values_train)
-createROC('XGB-test', y_test, y_pred_values)
+createROC('XGB-train', y_train, y_pred_values_train, modelName = modelName)
+createROC('XGB-test', y_test, y_pred_values, modelName = modelName)
 
 # evaluate predictions
 accuracy = accuracy_score(y_test, y_pred)
@@ -65,24 +70,33 @@ print("Accuracy (train): %.2f%%" % (accuracyTrain * 100.0))
 
 # Creating the Confusion Matrixes
 cm = confusion_matrix(y_test, y_pred)
-plot_confusion_matrix(cm, classes=['not pPs', 'pPs'],
-    modelName='XGB-test',
-    accuracy='Accuracy: ' + '%.2f' % (accuracy * 100.0) + '%, size: ' + str(y_pred.size)
+plot_confusion_matrix(
+    cm, 
+    classes=['not pPs', 'pPs'],
+    title='XGB-test',
+    accuracy='Accuracy: ' + '%.2f' % (accuracy * 100.0) + '%, size: ' + str(y_pred.size),
+    modelName = modelName
 )
 cmTrain = confusion_matrix(y_train, y_pred_train)
-plot_confusion_matrix(cmTrain, classes=['not pPs', 'pPs'],
-    modelName='XGB-train',
-    accuracy='Accuracy: ' + '%.2f' % (accuracyTrain * 100.0) + '%, size: ' + str(y_pred_train.size)
+plot_confusion_matrix(
+    cmTrain, 
+    classes=['not pPs', 'pPs'],
+    title = 'XGB-train',
+    accuracy = 'Accuracy: ' + '%.2f' % (accuracyTrain * 100.0) + '%, size: ' + str(y_pred_train.size),
+    modelName = modelName
 )
 
 # save model to file
-pickle.dump(clf.best_estimator_, open("stats/bestXGB.dat", "wb"))
+pickle.dump(clf.best_estimator_, open(modelName + "/bestXGB.dat", "wb"))
 # plot single tree
-plot_tree(clf.best_estimator_, rankdir='LR')
-plt.show()
+fig = plt.figure()
+fig.set_size_inches(3600, 2400)
+ax = plot_tree(clf.best_estimator_, rankdir='LR')
+plt.tight_layout()
+plt.savefig(modelName + "/bestTree.png", dpi = 600)
 
-pPsOrginalPositive = X_test[y_test.values > 0]
-pPsOrginalNegative = X_test[y_test.values == 0]
+pPsOrginalPositive = X_test[y_test > 0]
+pPsOrginalNegative = X_test[y_test == 0]
 pPsPredictedPositive = X_test[y_pred]
 pPsPredictedNegative = X_test[y_pred == 0]
 
@@ -91,5 +105,6 @@ TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
 TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
 FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
 
-saveHistograms(FP, TP, TN, FN, "XGB")
-reconstructionTest2D(FP, TP, title = 'IEC - XGB test recostrucion (TP + FP)')
+saveHistograms(FP, TP, TN, FN, modelName)
+reconstructionTest2D(FP, TP, modelName = modelName, title = 'IEC - XGB test recostrucion (TP + FP)')
+angleVsTime(FP, TP, TN, FN, modelName)

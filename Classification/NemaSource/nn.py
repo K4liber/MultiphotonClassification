@@ -1,4 +1,4 @@
-from stats.calc import *
+from calc import *
 import keras
 from keras.models import Sequential
 from keras.layers import Dense
@@ -23,7 +23,12 @@ class TrainCallback(Callback):
 def buildNN():
     model = Sequential()
     model.add(
-        Dense(output_dim = 15, init = 'uniform', activation = 'relu', input_dim = 11)
+        Dense(
+            output_dim = 15, # Layer size
+            init = 'uniform', # Way to set the initial random weights
+            activation = 'relu', # Activation function
+            input_dim = 11 # Number of attributes (input layer size)
+        ) 
     )
     model.add(
         Dense(output_dim = 8, init = 'uniform', activation = 'relu')
@@ -31,9 +36,16 @@ def buildNN():
     model.add(
         Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid')
     )
-    sgd = keras.optimizers.SGD(lr=0.05, decay=1e-6, momentum=0.9, nesterov=True)
+    # sgd = keras.optimizers.SGD(lr=0.05, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(
-        optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['mean_absolute_error']
+        optimizer = 'adam', # lr=0.001,
+                            # beta_1=0.9, 
+                            # beta_2=0.999, 
+                            # epsilon=None, 
+                            # decay=0.0, 
+                            # amsgrad=False
+        loss = 'binary_crossentropy', # The function that will get minimized by the optimizer.
+        metrics = ['mean_absolute_error'] # The metric used to judge the performance of your model.
     )
     return model
 
@@ -43,11 +55,15 @@ fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
 df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 10000000)
 
 classifier = buildNN()
-
 trainCallback = TrainCallback((X_train, y_train))
+
 # Fitting our model 
-obj = classifier.fit(X_train, y_train, batch_size = 32, nb_epoch = 3, 
-    callbacks=[trainCallback])
+obj = classifier.fit(
+    X_train, y_train, 
+    batch_size = 32, # Number of sample use to training at the the time
+    nb_epoch = 3, # Repeating the use of training data
+    callbacks=[trainCallback]
+)
 
 # Predicting the Test set results
 y_pred_values = classifier.predict(X_test)
@@ -86,4 +102,4 @@ TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
 FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
 
 saveHistograms(FP, TP, TN, FN, "NN")
-reconstructionTest2D(FP, TP, title = 'IEC - NN test recostrucion (TP + FP)')
+reconstructionTest2D(FP, TP, modelName = "NN", title = 'IEC - NN test recostrucion (TP + FP)')
