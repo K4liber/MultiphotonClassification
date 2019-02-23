@@ -14,7 +14,8 @@ import pickle
 modelName = "XGB10e7"
 mkdir_p(modelName)
 # Load and transform data into sets 
-directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
+# directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
+directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
 df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 1000)
 y_train = np.ravel(y_train)
@@ -90,11 +91,11 @@ plot_confusion_matrix(
 pickle.dump(clf.best_estimator_, open(modelName + "/bestXGB.dat", "wb"))
 pickle.dump(clf.cv_results_, open(modelName + "/CVresults.dat", "wb"))
 # plot single tree
-fig = plt.figure()
-fig.set_size_inches(3600, 2400)
-ax = plot_tree(clf.best_estimator_, rankdir='LR')
-plt.tight_layout()
-plt.savefig(modelName + "/bestTree.png", dpi = 600)
+# fig = plt.figure()
+# fig.set_size_inches(3600, 2400)
+# ax = plot_tree(clf.best_estimator_, rankdir='LR')
+# plt.tight_layout()
+# plt.savefig(modelName + "/bestTree.png", dpi = 600)
 
 pPsOrginalPositive = X_test[y_test > 0]
 pPsOrginalNegative = X_test[y_test == 0]
