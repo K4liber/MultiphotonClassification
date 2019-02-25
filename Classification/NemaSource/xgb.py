@@ -17,7 +17,7 @@ mkdir_p(modelName)
 # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
 directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
-df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 1000)
+df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 10000000)
 y_train = np.ravel(y_train)
 y_test = np.ravel(y_test)
 
@@ -31,7 +31,7 @@ model = XGBClassifier(
 param_dist = {
     'n_estimators': stats.randint(50, 200), # Number of trees in each classifier
     'learning_rate': stats.uniform(0.15, 0.05), # Contribution of each estimator
-    'max_depth': [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], # Maximum depth of a tree
+    'max_depth': [5, 6, 7, 8, 9, 10, 11], # Maximum depth of a tree
     'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1], # The fraction of columns to be subsampled
     'min_child_weight': [1, 2, 3, 4]    # Minimum sum of instance weight (hessian) needed in a child 8
                                         # In linear regression task, this simply corresponds to minimum 
@@ -41,7 +41,7 @@ param_dist = {
 clf = RandomizedSearchCV(
     model,
     param_distributions = param_dist,  
-    n_iter = 20, 
+    n_iter = 5, 
     cv = 3, # Cross-validation number of folds
     scoring = 'roc_auc', 
     error_score = 0, 
