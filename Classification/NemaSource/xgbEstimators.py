@@ -26,15 +26,15 @@ eval_set  = [( X_train, y_train), ( X_test, y_test)]
 results = {}
 bestXGB.fit(
     X_train, y_train,
-    early_stopping_rounds = 20
+    early_stopping_rounds = 20,
     eval_set = eval_set,
-    eval_metric = ["error", "logloss"]
+    eval_metric = ["error", "logloss"],
     callbacks = [xgb.callback.record_evaluation(results)]
 )
 # Plot the results
 n = range(maxEstimators)
-plt.plot(n, results['validation_0']['error'], label = "błąd treningowy")
-plt.plot(n, results['validation_1']['error'], label = "błąd testowy")
+plt.plot(results['validation_0']['error'], label = "błąd treningowy")
+plt.plot(results['validation_1']['error'], label = "błąd testowy")
 plt.xlabel("liczba drzew")
 plt.ylabel("odsetek błędnie sklasyfikowanych próbek")
 plt.title("XGBoost - bład predykcji w funkcji liczby estymatorów")
@@ -42,8 +42,8 @@ plt.legend(loc = "upper right")
 plt.savefig("xgbEstimatorsError.png")
 plt.clf()
 
-plt.plot(n, results['validation_0']['logloss'], label = "błąd treningowy")
-plt.plot(n, results['validation_1']['logloss'], label = "błąd testowy")
+plt.plot(results['validation_0']['logloss'], label = "błąd treningowy")
+plt.plot(results['validation_1']['logloss'], label = "błąd testowy")
 plt.xlabel("liczba drzew")
 plt.ylabel("log loss")
 plt.title("XGBoost - log loss w funkcji liczby estymatorów")
