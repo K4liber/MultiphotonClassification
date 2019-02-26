@@ -40,6 +40,9 @@ y_pred = bestXGB.predict(X_test)
 predictions = [round(value) for value in y_pred]
 accuracy = accuracy_score(y_test, predictions)
 
+# save model to file
+pickle.dump(bestXGB, open(modelName + "/xgbMAX_DEPTH" + str(max_depth) + ".dat", "wb"))
+
 # Plot the results
 n = range(maxEstimators)
 plt.plot(results['validation_0']['error'], label = "błąd treningowy")
