@@ -9,11 +9,11 @@ import sys
 
 # Load and transform data into sets 
 def loadData():
-    directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
-    # directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
+    # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
+    directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
     fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
     global df, X_train, X_test, y_train, y_test
-    df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 1000)
+    df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 10000000)
     y_train = np.ravel(y_train)
     y_test = np.ravel(y_test)
 
@@ -21,7 +21,7 @@ def loadData():
 loadData()
 # Load model
 bestXGB = pickle.load(open('XGB10e7/bestXGB.dat', 'rb'))
-maxEstimators = 500
+maxEstimators = 1500
 max_depth = sys.argv[1]
 bestXGB.set_params(**{'n_estimators': maxEstimators, 'max_depth': max_depth})
 # Train and test the model
