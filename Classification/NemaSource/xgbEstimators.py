@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 import sys
 
+modelName = "XGB10e7"
 # Load and transform data into sets 
 def loadData():
     # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
