@@ -130,6 +130,23 @@ def reconstructionTest3D(FP, TP):
     plt.title('JPET NEMA - NN test recostrucion')
     plt.show()
 
+def reconstruction2D(data, title, modelName):
+    points = pd.DataFrame(columns=['X', 'Y'])
+
+    for index, row in data.iterrows():
+        point = emissionPoint(row)
+        points = points.append({'X': point['x'], 'Y': point['y']}, ignore_index = True)
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
+    plt.hist2d(points["X"], points["Y"], bins=(200, 200), cmap = plt.cm.jet)
+    plt.colorbar()
+    ax.set_xlabel('x [cm]')
+    ax.set_ylabel('y [cm]')
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(modelName + "/" + modelName + '-IECreconstruction2D.png')
+
 def reconstructionTest2D(FP, TP, title, modelName):
     points = pd.DataFrame(columns=['X', 'Y'])
 

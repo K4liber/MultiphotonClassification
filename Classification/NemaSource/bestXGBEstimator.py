@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.6
 import pickle
 
 bestXGB = pickle.load(open('XGB10e7/bestXGB.dat', 'rb'))
