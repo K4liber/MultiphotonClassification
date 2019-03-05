@@ -19,11 +19,10 @@ def loadData():
 
 modelName = "ADA10e7"
 loadData()
-n_estimators = 1500
 max_depth = int(sys.argv[1])
+n_estimators = 1500
 model = AdaBoostClassifier(
     base_estimator = DecisionTreeClassifier(max_depth = max_depth),
-    algorithm = 'SAMME.R',
     n_estimators = n_estimators,
     learning_rate = 0.2
 )
@@ -43,12 +42,13 @@ for test_predicts, train_predicts in zip(
 pickle.dump(model, open(modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat", "wb"))
 
 bestAccuracy = 1.0 - min(test_errors)
+bestNEstimators = test_errors.index(min(test_errors))
 # Plot the results
 plt.plot(train_errors, label = "błąd treningowy")
 plt.plot(test_errors, label = "błąd testowy")
 plt.xlabel("liczba drzew")
 plt.ylabel("odsetek błędnie sklasyfikowanych próbek")
-plt.title("AdaBoost error (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ")")
+plt.title("AdaBoost error (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
 plt.legend(loc = "upper right")
 plt.savefig("adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".png")
 plt.clf()
