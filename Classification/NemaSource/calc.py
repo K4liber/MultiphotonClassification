@@ -164,6 +164,8 @@ def reconstructionTest2D(FP, TP, title, modelName):
     plt.colorbar()
     ax.set_xlabel('x [cm]')
     ax.set_ylabel('y [cm]')
+    plt.xlim([-20, 20])
+    plt.ylim([-20, 20])
     plt.title(title)
     plt.tight_layout()
     plt.savefig(modelName + "/" + modelName + '-IECreconstruction2D.png')
@@ -235,6 +237,8 @@ def plotAngleVsTime(Data, name, modelName):
     ax.set_ylabel('alpha')
     plt.title(name)
     plt.tight_layout()
+    plt.xlim([-1250, 0])
+    plt.ylim([110, 180])
     plt.savefig(modelName + "/" + name + '-angleVsTime.png')
 
 def plotMixedAngleVsTime(Data1, Data2, name, modelName):
@@ -258,6 +262,8 @@ def plotMixedAngleVsTime(Data1, Data2, name, modelName):
     ax.set_ylabel('alpha')
     plt.title(name)
     plt.tight_layout()
+    plt.xlim([-1250, 0])
+    plt.ylim([110, 180])
     plt.savefig(modelName + "/" + name + '-angleVsTime.png')
 
 def angleVsTime(FP, TP, TN, FN, modelName):

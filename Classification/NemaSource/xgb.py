@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.6
+
 import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
@@ -14,10 +16,10 @@ import pickle
 modelName = "XGB10e7"
 mkdir_p(modelName)
 # Load and transform data into sets 
-# directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
-directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
+directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
+# directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
-df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 10000000)
+df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 1000)
 y_train = np.ravel(y_train)
 y_test = np.ravel(y_test)
 
