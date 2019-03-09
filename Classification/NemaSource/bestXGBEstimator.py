@@ -15,7 +15,7 @@ import sys
 from xgboost import plot_importance
 from sklearn.metrics import log_loss
 
-dataSize = sys.argv[1]
+dataSize = int(sys.argv[1])
 reconstuct = sys.argv[2]
 modelName = "XGB" + str(dataSize)
 mkdir_p(modelName)
@@ -23,7 +23,7 @@ mkdir_p(modelName)
 # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
 directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
-df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, int(dataSize))
+df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, dataSize)
 y_train = np.ravel(y_train)
 y_test = np.ravel(y_test)
 
@@ -87,6 +87,5 @@ if reconstuct == "T":
     reconstructionTest2D(FP, TP, modelName = modelName, title = 'IEC - XGB test recostrucion (TP + FP)')
     angleVsTime(FP, TP, TN, FN, modelName)
 
-    # plot feature importance
     plot_importance(bestXGB)
     plt.savefig(modelName + "/featureImportance.png")

@@ -143,6 +143,8 @@ def reconstruction2D(data, title, modelName):
     plt.colorbar()
     ax.set_xlabel('x [cm]')
     ax.set_ylabel('y [cm]')
+    plt.xlim([-20, 20])
+    plt.ylim([-20, 20])
     plt.title(title)
     plt.tight_layout()
     plt.savefig(modelName + "/" + modelName + '-IECreconstruction2D.png')
@@ -210,16 +212,16 @@ def createROC(title, y, y_pred, modelName):
 
 def saveHistograms(FP, TP, TN, FN, modelName):
     FPStatsFrame = FP[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
-    createStats(FPStatsFrame, modelName + '-False Positive', modelName = modelName)
+    createStats(FPStatsFrame, modelName + '-FP', modelName = modelName)
 
     TPStatsFrame = TP[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
-    createStats(TPStatsFrame, modelName + '-True Positive', modelName = modelName)
+    createStats(TPStatsFrame, modelName + '-TP', modelName = modelName)
 
     TNStatsFrame = TN[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
-    createStats(TNStatsFrame, modelName + '-True Negative', modelName = modelName)
+    createStats(TNStatsFrame, modelName + '-TN', modelName = modelName)
 
     FNStatsFrame = FN[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
-    createStats(FNStatsFrame, modelName + '-False Negative', modelName = modelName)
+    createStats(FNStatsFrame, modelName + '-FN', modelName = modelName)
 
 def plotAngleVsTime(Data, name, modelName):
     points = pd.DataFrame(columns = ['dt', 'alpha'])
@@ -285,3 +287,14 @@ def mkdir_p(mypath):
         if exc.errno == EEXIST and path.isdir(mypath):
             pass
         else: raise
+
+def plotFeatureImportances(features, importances, modelName):
+    y_pos = np.arange(features.size)
+    plt.clf()
+    indexes = np.argsort(importances)
+    plt.title("Feature importances - " + modelName)
+    plt.barh(y_pos, np.sort(importances))
+    plt.yticks(y_pos, features[indexes])
+    plt.xlabel('F score')
+    plt.ylabel("Feature")
+    plt.savefig(modelName + "/featureImportance.png")

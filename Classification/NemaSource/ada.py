@@ -13,6 +13,8 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import confusion_matrix
 import pickle
+import sys
+from sklearn.metrics import log_loss
 
 def loadData():
     directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
@@ -23,18 +25,20 @@ def loadData():
     y_train = np.ravel(y_train)
     y_test = np.ravel(y_test)
 
-modelName = "ADA10e7"
+dataSize = int(sys.argv[1])
+n_estimators = int(sys.argv[2])
+max_depth = int(sys.argv[3])
+reconstuct = sys.argv[4]
+modelName = "ADA" + str(dataSize)
 mkdir_p(modelName)
 loadData()
-n_estimators = 50
-max_depth = 7
 
 # fit model on training data
 model = AdaBoostClassifier(
     base_estimator = DecisionTreeClassifier(max_depth = max_depth),
     algorithm = 'SAMME.R',
     n_estimators = n_estimators,
-    learning_rate = 1.0
+    learning_rate = 0.2
 )
 
 model.fit(X_train, y_train)
@@ -52,10 +56,15 @@ createROC('ADA-train', y_train, y_pred_values_train, modelName = modelName)
 createROC('ADA-test', y_test, y_pred_values, modelName = modelName)
 
 # evaluate predictions
+evaluateFile = open(modelName + '/evaluation.dat', 'w')
 accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy (test): %.2f%%" % (accuracy * 100.0))
+evaluateFile.write("Accuracy (test): %.2f%%\n" % (accuracy * 100.0))
 accuracyTrain = accuracy_score(y_train, y_pred_train)
-print("Accuracy (train): %.2f%%" % (accuracyTrain * 100.0))
+evaluateFile.write("Accuracy (train): %.2f%%\n" % (accuracyTrain * 100.0))
+logLossTest = log_loss(y_test, y_pred_values)
+evaluateFile.write("Log loss (test): %.2f\n" % (logLossTest))
+logLossTrain = log_loss(y_train, y_pred_values_train)
+evaluateFile.write("Log loss (train): %.2f\n" % (logLossTrain))
 
 # Creating the Confusion Matrixes
 cm = confusion_matrix(y_test, y_pred)
@@ -84,16 +93,18 @@ pickle.dump(model, open(modelName + "/ADAmodel.dat", "wb"))
 # plt.tight_layout()
 # plt.savefig(modelName + "/bestTree.png", dpi = 600)
 
-pPsOrginalPositive = X_test[y_test > 0]
-pPsOrginalNegative = X_test[y_test == 0]
-pPsPredictedPositive = X_test[y_pred]
-pPsPredictedNegative = X_test[y_pred == 0]
+if reconstuct == "T":
+    pPsOrginalPositive = X_test[y_test > 0]
+    pPsOrginalNegative = X_test[y_test == 0]
+    pPsPredictedPositive = X_test[y_pred]
+    pPsPredictedNegative = X_test[y_pred == 0]
 
-FP = pd.merge(pPsPredictedPositive,pPsOrginalNegative, how='inner')
-TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
-TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
-FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
+    FP = pd.merge(pPsPredictedPositive,pPsOrginalNegative, how='inner')
+    TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
+    TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
+    FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
 
-saveHistograms(FP, TP, TN, FN, modelName)
-reconstructionTest2D(FP, TP, modelName = modelName, title = 'IEC - ADA test recostrucion (TP + FP)')
-angleVsTime(FP, TP, TN, FN, modelName)
+    saveHistograms(FP, TP, TN, FN, modelName)
+    reconstructionTest2D(FP, TP, modelName = modelName, title = 'IEC - ADA test recostrucion (TP + FP)')
+    angleVsTime(FP, TP, TN, FN, modelName)
+    plotFeatureImportances(X_train.columns, model.feature_importances_, modelName)
