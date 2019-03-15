@@ -17,7 +17,8 @@ def loadData(dataSize):
     df = dd.read_csv(
         directory + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part*', 
         sep = "\t", names = dataFrameNames()
-    ).head(dataSize, npartitions=-1)
+    )
+    df = df.head(dataSize, npartitions=-1)
 
 dataSize = int(sys.argv[2])
 loadData(dataSize)
