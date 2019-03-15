@@ -1,7 +1,8 @@
 #!/usr/bin/env python3.6
 from calc import *
 
-modelName = '2e7'
+dataSize = int(sys.argv[1])
+modelName = "STATS" + str(dataSize)
 mkdir_p(modelName)
 # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
 directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
