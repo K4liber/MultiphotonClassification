@@ -7,27 +7,28 @@ from sklearn.metrics import roc_curve, auc
 import numpy as np
 import itertools
 
-dataFrameNames = [
-    "x1", # 1 gamma detected x position [cm]
-    "y1", # 1 gamma detected y position [cm]
-    "z1", # 1 gamma detected z position [cm]
-    "t1", # 1 gamma detection time [ps]
-    "x2", # 2 gamma detected x position [cm]
-    "y2", # 2 gamma detected y position [cm]
-    "z2", # 2 gamma detected z position [cm]
-    "t2", # 2 gamma detection time [ps]
-    "vol1", # 1 gamma volume ID
-    "vol2", # 2 gamma volume ID
-    "e1", # 1 gamma energy loss during detection [keV]
-    "e2", # 2 gamma energy loss during detection [keV]
-    "class", # Type of coincidence(1-true, 2-phantom-scattered, 3-detector-scattered, 4-accidental)
-    "sX1", # 1 gamma emission x position [cm]
-    "sY1", # 1 gamma emission y position [cm]
-    "sZ1" # 1 gamma emission z position [cm]
-]
+def dataFrameNames():
+    return [
+        "x1", # 1 gamma detected x position [cm]
+        "y1", # 1 gamma detected y position [cm]
+        "z1", # 1 gamma detected z position [cm]
+        "t1", # 1 gamma detection time [ps]
+        "x2", # 2 gamma detected x position [cm]
+        "y2", # 2 gamma detected y position [cm]
+        "z2", # 2 gamma detected z position [cm]
+        "t2", # 2 gamma detection time [ps]
+        "vol1", # 1 gamma volume ID
+        "vol2", # 2 gamma volume ID
+        "e1", # 1 gamma energy loss during detection [keV]
+        "e2", # 2 gamma energy loss during detection [keV]
+        "class", # Type of coincidence(1-true, 2-phantom-scattered, 3-detector-scattered, 4-accidental)
+        "sX1", # 1 gamma emission x position [cm]
+        "sY1", # 1 gamma emission y position [cm]
+        "sZ1" # 1 gamma emission z position [cm]
+    ] 
 
 def createLearningBatches(fileName, size):
-    df = pd.read_csv(fileName, sep = "\t", names = dataFrameNames).head(size)
+    df = pd.read_csv(fileName, sep = "\t", names = dataFrameNames()).head(size)
     df["dt"] = df["t1"] - df["t2"]
     codes = {1:1, 2:0, 3:0, 4:0}
     df["class"] = df["class"].map(codes)
