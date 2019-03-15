@@ -1,7 +1,8 @@
 #!/usr/bin/env python3.6
 
 import sys
-sys.path.append('/media/jasiek/F686ACAE86AC7133/Dokumenty/Studia/PracaMagisterska/MultiphotonClassification/Classification/NemaSource')
+# sys.path.append('/media/jasiek/F686ACAE86AC7133/Dokumenty/Studia/PracaMagisterska/MultiphotonClassification/Classification/NemaSource')
+sys.path.append('/mnt/home/jbielecki1/MultiphotonClassification/Classification/NemaSource')
 from calc import dataFrameNames
 import numpy as np
 import dask.dataframe as dd
