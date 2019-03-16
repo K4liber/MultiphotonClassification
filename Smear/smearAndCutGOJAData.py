@@ -61,6 +61,10 @@ def smearAndCut(df, energyThreshold):
 
 def smearAndCutData(energyThreshold, nrows):
     fileName = directory + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part'
+
+    if sys.argv[1] == "K": 
+        fileName = '/mnt/home/jbielecki1/NEMA/NEMA_IQ_384str_N0_1000_COINCIDENCES_part'
+        
     for i in range(10):
         df = pd.read_csv(fileName+str(0)+str(i), sep = "\t", names = dataFrameNames(), nrows = nrows)
         smearAndCut(df, energyThreshold).to_csv(
