@@ -27,7 +27,12 @@ def smearTime(time):
     return np.random.normal(time, 0.15) # Sigma = 150ps
 
 def smearZ(z):
-    return np.random.normal(z, 1) # Sigma = 1cm
+    newZ = np.random.normal(z, 1) # Sigma = 1cm
+    
+    if newZ > 25: newZ = 25
+    if newZ < -25: newZ = -25
+
+    return newZ
 
 def smearX(volID):
     angle = math.radians(360 * (volID - 1)/384) # max volume ID = 384
