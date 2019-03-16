@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 def loadData(nrows):
     global df, dfSmeardCuted
     dfSmeardCuted = pd.read_csv(
-        directory + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_partSMEAERED00', 
+        '/mnt/home/jbielecki1/NEMA/' + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_partSMEAERED00', 
         sep = "\t", names = dataFrameNames(), nrows = nrows
     )
     df = pd.read_csv(
