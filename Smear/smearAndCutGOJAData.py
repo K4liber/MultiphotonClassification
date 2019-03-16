@@ -63,19 +63,21 @@ def smearAndCutData(energyThreshold, nrows):
     fileName = directory + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part'
 
     if sys.argv[1] == "K": 
-        fileName = '/mnt/home/jbielecki1/NEMA/NEMA_IQ_384str_N0_1000_COINCIDENCES_part'
-        
+        saveFileName = '/mnt/home/jbielecki1/NEMA/NEMA_IQ_384str_N0_1000_COINCIDENCES_part'
+    else:
+        saveFileName = fileName
+
     for i in range(10):
         df = pd.read_csv(fileName+str(0)+str(i), sep = "\t", names = dataFrameNames(), nrows = nrows)
         smearAndCut(df, energyThreshold).to_csv(
-            fileName+'SMEAERED'+str(0)+str(i), 
+            saveFileName+'SMEAERED'+str(0)+str(i), 
             header=False, index=False,sep='\t'
         )
 
     for i in range(9):
         df = pd.read_csv(fileName+str(1)+str(i), sep = "\t", names = dataFrameNames(), nrows = nrows)
         smearAndCut(df, energyThreshold).to_csv(
-            fileName+'SMEAERED'+str(1)+str(i), 
+            saveFileName+'SMEAERED'+str(1)+str(i), 
             header=False, index=False,sep='\t'
         )
 
