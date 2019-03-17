@@ -1,11 +1,11 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d, Axes3D
 import math
 from sklearn.metrics import roc_curve, auc
 import numpy as np
 import itertools
+import dask.dataframe as dd
 
 def dataFrameNames():
     return [
@@ -28,13 +28,23 @@ def dataFrameNames():
     ] 
 
 def createLearningBatches(fileName, size):
-    df = pd.read_csv(fileName, sep = "\t", names = dataFrameNames()).head(size)
+    if size > 10000000:
+        from dask_ml.model_selection import train_test_split
+        df = dd.read_csv(
+            fileName + '*', 
+            sep = "\t", names = dataFrameNames()
+        )
+    else:
+        df = pd.read_csv(fileName, sep = "\t", names = dataFrameNames()).head(size)
+        from sklearn.model_selection import train_test_split
+
     df["dt"] = df["t1"] - df["t2"]
     codes = {1:1, 2:0, 3:0, 4:0}
     df["class"] = df["class"].map(codes)
     x = df.drop(["t1", "t2", "sX1", "sY1", "sZ1", "class"], axis = 1)
     y = df[["class"]]
-    xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.2, random_state = 42)
+    xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.2, train_size = 0.8, random_state = 42)
+    print("Batches created successfully!")
     return df, xTrain, xTest, yTrain, yTest
 
 def createStats(df, name, modelName):
