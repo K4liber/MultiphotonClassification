@@ -1,4 +1,4 @@
-Accuracy (test): 82.07%
-Accuracy (train): 99.66%
-Log loss (test): 6.19
-Log loss (train): 0.12
+Accuracy (test): 82.66%
+Accuracy (train): 99.64%
+Log loss (test): 0.32
+Log loss (train): 0.09

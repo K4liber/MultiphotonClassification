@@ -17,11 +17,12 @@ from sklearn.metrics import log_loss
 
 dataSize = int(sys.argv[1])
 reconstuct = sys.argv[2]
-modelName = "XGB" + str(dataSize)
+modelName = "XGBSmeared" + str(dataSize)
 mkdir_p(modelName)
 # Load and transform data into sets 
-# directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
-directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
+# directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/3000s/'
+# directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
+directory = '/mnt/home/jbielecki1/MultiphotonClassification/NEMA/'
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
 df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, dataSize)
 y_train = np.ravel(y_train)
@@ -30,18 +31,27 @@ y_test = np.ravel(y_test)
 bestXGB = pickle.load(open('XGB10e7/bestXGB.dat', 'rb'))
 bestXGB.set_params(**{'n_estimators': 1500, 'max_depth': 7})
 bestXGB.fit(X_train, y_train)
+pickle.dump(bestXGB, open(modelName + "/trained" + modelName + ".dat", "wb"))
 
 # make predictions for test data
-y_pred_values = bestXGB.predict(X_test)
+y_pred_values = bestXGB.predict_proba(X_test)[:,1]
 y_pred = (y_pred_values > 0.5)
 
 # make predictions for train data
-y_pred_values_train = bestXGB.predict(X_train)
+y_pred_values_train = bestXGB.predict_proba(X_train)[:,1]
 y_pred_train = (y_pred_values_train > 0.5)
+
+# Create predictions distributions
+predictionsDistribution(y_test, y_pred_values, modelName = modelName, title = "IEC-" + modelName + "-Test")
+predictionsDistribution(y_train, y_pred_values_train, modelName = modelName, title = "IEC-" + modelName + "-Train")
 
 # Create ROC curves
 createROC('XGB-train', y_train, y_pred_values_train, modelName = modelName)
 createROC('XGB-test', y_test, y_pred_values, modelName = modelName)
+
+# Create precision curves
+drawPrecision(X_train, y_train, y_pred_values_train, modelName = modelName, title = 'XGB-train')
+drawPrecision(X_test, y_test, y_pred_values,  modelName = modelName, title = 'XGB-test')
 
 # evaluate predictions
 evaluateFile = open(modelName + '/evaluation.dat', 'w')

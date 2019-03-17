@@ -34,7 +34,7 @@ def createLearningBatches(fileName, size):
     df["class"] = df["class"].map(codes)
     x = df.drop(["t1", "t2", "sX1", "sY1", "sZ1", "class"], axis = 1)
     y = df[["class"]]
-    xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.2)
+    xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.2, random_state = 42)
     return df, xTrain, xTest, yTrain, yTest
 
 def createStats(df, name, modelName):
@@ -299,3 +299,43 @@ def plotFeatureImportances(features, importances, modelName):
     plt.xlabel('F score')
     plt.ylabel("Feature")
     plt.savefig(modelName + "/featureImportance.png")
+
+def predictionsDistribution(y, y_pred, modelName, title):
+    positive = y > 0.5
+    plt.clf()
+    plt.hist(y_pred[positive], color = 'green', bins = 20, edgecolor='green', alpha = 0.5, label = 'positive samples')
+    plt.hist(y_pred[~positive], color = 'red', bins = 20, edgecolor='red', alpha = 0.5, label = 'negative samples')
+    plt.title("Predictions distribution " + title)
+    plt.xlabel("Probability of belonging to a positive class")
+    plt.ylabel("#")
+    plt.yscale('log')
+    plt.legend(loc = "upper center")
+    plt.savefig(modelName + "/predictionDistribution" + title + ".png")
+
+def drawPrecision(X, y, y_pred, modelName, title = 'XGB-train'):
+    plt.clf()
+    points = pd.DataFrame(columns = ["recall", "precision", "threshold"])
+    pPsOrginalPositive = X[y > 0]
+    pPsOrginalNegative = X[y == 0]
+
+    for i in range(201):
+        threshold = i/200.0
+        pPsPredictedPositive = X[y_pred >= threshold]
+        pPsPredictedNegative = X[y_pred < threshold]
+
+        FP = float(len(pd.merge(pPsPredictedPositive,pPsOrginalNegative, how='inner')))
+        TP = float(len(pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')))
+        TN = float(len(pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')))
+        FN = float(len(pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')))
+
+        if (TP+FN) != 0 and (TP+FP) != 0:
+            points = points.append({"recall": TP/(TP+FN), "precision": TP/(TP+FP) , "threshold": threshold}, ignore_index = True)
+
+    plt.scatter(points["recall"], points["precision"], c = points['threshold'], s = 35)
+    plt.title("Precision in recall function - " + title)
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
+    plt.colorbar()
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.savefig(modelName + "/precision" + title + ".png")
