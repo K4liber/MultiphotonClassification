@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 def loadData(nrows):
     global df, dfSmeardCuted
     dfSmeardCuted = pd.read_csv(
-        directory + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_partSMEAERED00', 
+        '/mnt/home/jbielecki1/NEMA/' + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_partSMEAERED00', 
         sep = "\t", names = dataFrameNames(), nrows = nrows
     )
     df = pd.read_csv(
@@ -28,7 +28,7 @@ directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/300
 dataSize = None
 
 if sys.argv[1] == "K": directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
-if sys.argv[2]: dataSize = int(sys.argv[2])
+if len(sys.argv) > 2 and sys.argv[2]: dataSize = int(sys.argv[2])
 
 loadData(dataSize) # energy threshold after smear = 200 keV
 
