@@ -7,6 +7,9 @@ import numpy as np
 import itertools
 import dask.dataframe as dd
 
+def getWorkingDir():
+    return '/mnt/home/jbielecki1/MultiphotonClassification/Classification/NemaSource/'
+
 def dataFrameNames():
     return [
         "x1", # 1 gamma detected x position [cm]
@@ -53,35 +56,35 @@ def createStats(df, name, modelName):
     plt.title('Energy loss - ' + name)
     plt.xlabel('Energy [keV]')
     plt.ylabel('#')
-    plt.savefig(modelName + "/" + name + 'Energy.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + name + 'Energy.png')
 
     plt.figure()
     plt.hist(df[["dt"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
     plt.title('Detection time difference - ' + name)
     plt.xlabel('time difference [us]')
     plt.ylabel('#')
-    plt.savefig(modelName + "/" + name + 'Time.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + name + 'Time.png')
 
     plt.figure()
     plt.hist(df[["x1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
     plt.title('X position - ' + name)
     plt.xlabel('Position [cm]')
     plt.ylabel('#')
-    plt.savefig(modelName + "/" + name + 'X.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + name + 'X.png')
  
     plt.figure()
     plt.hist(df[["y1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
     plt.title('Y position - ' + name)
     plt.xlabel('Position [cm]')
     plt.ylabel('#')
-    plt.savefig(modelName + "/" + name + 'Y.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + name + 'Y.png')
   
     plt.figure()
     plt.hist(df[["z1"]].transpose(), bins=20, edgecolor='k', alpha=0.7)
     plt.title('Z position - ' + name)
     plt.xlabel('Position [cm]')
     plt.ylabel('#')
-    plt.savefig(modelName + "/" + name + 'Z.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + name + 'Z.png')
 
 def emissionPoint(row):
     sOfL = 0.03 # cm/ps
@@ -158,7 +161,7 @@ def reconstruction2D(data, title, modelName):
     plt.ylim([-20, 20])
     plt.title(title)
     plt.tight_layout()
-    plt.savefig(modelName + "/" + modelName + '-IECreconstruction2D.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + modelName + '-IECreconstruction2D.png')
 
 def reconstructionTest2D(FP, TP, title, modelName):
     points = pd.DataFrame(columns=['X', 'Y'])
@@ -181,7 +184,7 @@ def reconstructionTest2D(FP, TP, title, modelName):
     plt.ylim([-20, 20])
     plt.title(title)
     plt.tight_layout()
-    plt.savefig(modelName + "/" + modelName + '-IECreconstruction2D.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + modelName + '-IECreconstruction2D.png')
 
 def plot_confusion_matrix(cm, classes, title, accuracy, modelName, cmap=plt.cm.Blues):
     plt.clf()
@@ -207,7 +210,7 @@ def plot_confusion_matrix(cm, classes, title, accuracy, modelName, cmap=plt.cm.B
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
     plt.tight_layout()
-    plt.savefig(modelName + "/" + title + 'confMatrix.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + title + 'confMatrix.png')
 
 def createROC(title, y, y_pred, modelName):
     fpr_keras, tpr_keras, _ = roc_curve(y, y_pred)
@@ -219,7 +222,7 @@ def createROC(title, y, y_pred, modelName):
     plt.ylabel('True positive rate')
     plt.title(title + '-ROC')
     plt.legend(loc='best')
-    plt.savefig(modelName + "/" + title + '-ROC.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + title + '-ROC.png')
 
 def saveHistograms(FP, TP, TN, FN, modelName):
     FPStatsFrame = FP[["e1","x1", "y1", "z1", "dt"]].drop_duplicates()
@@ -252,7 +255,7 @@ def plotAngleVsTime(Data, name, modelName):
     plt.tight_layout()
     plt.xlim([-1250, 0])
     plt.ylim([110, 180])
-    plt.savefig(modelName + "/" + name + '-angleVsTime.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + name + '-angleVsTime.png')
 
 def plotMixedAngleVsTime(Data1, Data2, name, modelName):
     points = pd.DataFrame(columns = ['dt', 'alpha'])
@@ -277,7 +280,7 @@ def plotMixedAngleVsTime(Data1, Data2, name, modelName):
     plt.tight_layout()
     plt.xlim([-1250, 0])
     plt.ylim([110, 180])
-    plt.savefig(modelName + "/" + name + '-angleVsTime.png')
+    plt.savefig(getWorkingDir() + modelName + "/" + name + '-angleVsTime.png')
 
 def angleVsTime(FP, TP, TN, FN, modelName):
     plotAngleVsTime(FP, modelName + '-FP', modelName = modelName)
@@ -308,7 +311,7 @@ def plotFeatureImportances(features, importances, modelName):
     plt.yticks(y_pos, features[indexes])
     plt.xlabel('F score')
     plt.ylabel("Feature")
-    plt.savefig(modelName + "/featureImportance.png")
+    plt.savefig(getWorkingDir() + modelName + "/featureImportance.png")
 
 def predictionsDistribution(y, y_pred, modelName, title):
     positive = y > 0.5
@@ -320,7 +323,7 @@ def predictionsDistribution(y, y_pred, modelName, title):
     plt.ylabel("#")
     plt.yscale('log')
     plt.legend(loc = "upper center")
-    plt.savefig(modelName + "/predictionDistribution" + title + ".png")
+    plt.savefig(getWorkingDir() + modelName + "/predictionDistribution" + title + ".png")
 
 def drawPrecision(X, y, y_pred, modelName, title = 'XGB-train'):
     plt.clf()
@@ -348,4 +351,4 @@ def drawPrecision(X, y, y_pred, modelName, title = 'XGB-train'):
     plt.colorbar()
     plt.xlim([-0.05, 1.05])
     plt.ylim([-0.05, 1.05])
-    plt.savefig(modelName + "/precision" + title + ".png")
+    plt.savefig(getWorkingDir() + modelName + "/precision" + title + ".png")

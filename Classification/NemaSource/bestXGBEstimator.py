@@ -5,8 +5,6 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 import sys
 sys.path.append("/mnt/home/jbielecki1/MultiphotonClassification/Classification/NemaSource")
-sys.path.append("/mnt/home/jbielecki1/MultiphotonClassification/Classification/\
-NemaSource/XGB10e7")
 from calc import *
 from sklearn.model_selection import RandomizedSearchCV
 from scipy import stats
@@ -22,7 +20,7 @@ from sklearn.metrics import log_loss
 dataSize = int(sys.argv[1])
 reconstuct = sys.argv[2]
 modelName = "XGBSmeared" + str(dataSize)
-mkdir_p('/mnt/home/jbielecki1/MultiphotonClassification/Classification/NemaSource/' + modelName)
+mkdir_p(getWorkingDir() + modelName)
 # Load and transform data into sets 
 # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/3000s/'
 # directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
@@ -32,11 +30,11 @@ df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileNam
 y_train = np.ravel(y_train)
 y_test = np.ravel(y_test)
 
-bestXGB = pickle.load(open('/mnt/home/jbielecki1/MultiphotonClassification/Classification/NemaSource/XGB10e7/bestXGB.dat', 'rb'))
+bestXGB = pickle.load(open(getWorkingDir() + 'XGB10e7/bestXGB.dat', 'rb'))
 bestXGB.set_params(**{'n_estimators': 1500, 'max_depth': 7})
 bestXGB.fit(X_train, y_train)
 print("Model trained successfully!")
-pickle.dump(bestXGB, open(modelName + "/trained" + modelName + ".dat", "wb"))
+pickle.dump(bestXGB, open(getWorkingDir() + modelName + "/trained" + modelName + ".dat", "wb"))
 
 # make predictions for test data
 y_pred_values = bestXGB.predict_proba(X_test)[:,1]
