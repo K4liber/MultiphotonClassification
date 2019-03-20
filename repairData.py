@@ -92,6 +92,7 @@ for i in range(10):
         names=dataFrameNames()
     )
     data['dt'] = data.apply (lambda row: row['t1'] - row['t2'], axis=1)
+    data[['RX1','RY1','RZ1']] = data.apply(lambda row: pd.Series(emissionPoint(row)), axis=1)
     data['emissionDistance'] = data.apply(lambda row:distance(row), axis=1)
     data['class'] = data.apply(lambda row:reClass(row), axis = 1)
     data = data.apply(lambda row:shuffleTheOrder(row), axis = 1)
