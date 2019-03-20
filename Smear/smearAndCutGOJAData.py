@@ -24,7 +24,7 @@ def smearEnergy(energy):
     return np.random.normal(energy, 1000. * sigmaEnergy((energy) * 1. / 1000.))
 
 def smearTime(time):
-    return np.random.normal(time, 0.15) # Sigma = 150ps
+    return np.random.normal(time, 150) # Sigma = 150ps
 
 def smearZ(z):
     newZ = np.random.normal(z, 1) # Sigma = 1cm
