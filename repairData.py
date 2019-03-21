@@ -14,6 +14,7 @@ if sys.argv[1] == "K":
     pathToDataSave = '/mnt/home/jbielecki1/NEMA/'
 
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_'
+part = sys.argv[1]
 
 def dataFrameNames():
     return [
@@ -85,37 +86,19 @@ def shuffleTheOrder(row):
         
     return rowCopy
 
-for i in range(10):
-    data = pd.read_csv(
-        pathToDataLoad + fileName + "part0" + str(i), 
-        sep = "\t", 
-        names=dataFrameNames()
-    )
-    data['dt'] = data.apply (lambda row: row['t1'] - row['t2'], axis=1)
-    data[['RX1','RY1','RZ1']] = data.apply(lambda row: pd.Series(emissionPoint(row)), axis=1)
-    data['emissionDistance'] = data.apply(lambda row:distance(row), axis=1)
-    data['class'] = data.apply(lambda row:reClass(row), axis = 1)
-    data = data.apply(lambda row:shuffleTheOrder(row), axis = 1)
-    data = data.drop(['dt', 'RX1', 'RY1','RZ1', 'emissionDistance'], axis = 1)
-    data.to_csv(
-        pathToDataSave + fileName + 'REPAIRED_' + "part0" + str(i), 
-        header=False, index=False, sep='\t'
-    )
-    print("Processed " + str(i+1) + "/19.")
-
-for i in range(9):
-    data = pd.read_csv(
-        pathToDataLoad + fileName + "part1" + str(i), 
-        sep = "\t", 
-        names=dataFrameNames()
-    )
-    data['dt'] = data.apply (lambda row: row['t1'] - row['t2'], axis=1)
-    data['emissionDistance'] = data.apply(lambda row:distance(row), axis=1)
-    data['class'] = data.apply(lambda row:reClass(row), axis = 1)
-    data = data.apply(lambda row:shuffleTheOrder(row), axis = 1)
-    data = data.drop(['dt', 'RX1', 'RY1','RZ1', 'emissionDistance'], axis = 1)
-    data.to_csv(
-        pathToDataSave + fileName + 'REPAIRED_' + "part1" + str(i), 
-        header=False, index=False, sep='\t'
-    )
-    print("Processed " + str(i+11) + "/19.")
+print("Processing file " + fileName + 'REPAIRED_' + "part" + part)
+data = pd.read_csv(
+    pathToDataLoad + fileName + "part" + part, 
+    sep = "\t", 
+    names=dataFrameNames()
+)
+data['dt'] = data.apply (lambda row: row['t1'] - row['t2'], axis=1)
+data[['RX1','RY1','RZ1']] = data.apply(lambda row: pd.Series(emissionPoint(row)), axis=1)
+data['emissionDistance'] = data.apply(lambda row:distance(row), axis=1)
+data['class'] = data.apply(lambda row:reClass(row), axis = 1)
+data = data.apply(lambda row:shuffleTheOrder(row), axis = 1)
+data = data.drop(['dt', 'RX1', 'RY1','RZ1', 'emissionDistance'], axis = 1)
+data.to_csv(
+    pathToDataSave + fileName + 'REPAIRED_' + "part" + part, 
+    header=False, index=False, sep='\t'
+)
