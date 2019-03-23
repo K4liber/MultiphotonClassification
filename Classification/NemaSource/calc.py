@@ -8,8 +8,8 @@ import itertools
 import dask.dataframe as dd
 
 def getWorkingDir():
-    # return '/mnt/home/jbielecki1/MultiphotonClassification/Classification/NemaSource/'
-    return '/media/jasiek/F686ACAE86AC7133/Dokumenty/Studia/PracaMagisterska/MultiphotonClassification/Classification/NemaSource/'
+    return '/mnt/home/jbielecki1/MultiphotonClassification/Classification/NemaSource/'
+    # return '/media/jasiek/F686ACAE86AC7133/Dokumenty/Studia/PracaMagisterska/MultiphotonClassification/Classification/NemaSource/'
 
 def dataFrameNames():
     return [
