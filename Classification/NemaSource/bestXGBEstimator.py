@@ -25,7 +25,7 @@ mkdir_p(getWorkingDir() + modelName)
 # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/3000s/'
 # directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
 directory = '/mnt/home/jbielecki1/NEMA/'
-fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_partSMEAERED'
+fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_REPAIRED_spart'
 df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, dataSize)
 y_train = np.ravel(y_train)
 y_test = np.ravel(y_test)
