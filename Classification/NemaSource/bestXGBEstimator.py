@@ -19,7 +19,7 @@ from sklearn.metrics import log_loss
 
 dataSize = int(sys.argv[1])
 reconstuct = sys.argv[2]
-modelName = "XGBSmeared" + str(dataSize)
+modelName = "XGBRepaired" + str(dataSize)
 mkdir_p(getWorkingDir() + modelName)
 # Load and transform data into sets 
 # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/3000s/'
@@ -43,18 +43,6 @@ y_pred = (y_pred_values > 0.5)
 # make predictions for train data
 y_pred_values_train = bestXGB.predict_proba(X_train)[:,1]
 y_pred_train = (y_pred_values_train > 0.5)
-
-# Create predictions distributions
-predictionsDistribution(y_test, y_pred_values, modelName = modelName, title = "IEC-" + modelName + "-Test")
-predictionsDistribution(y_train, y_pred_values_train, modelName = modelName, title = "IEC-" + modelName + "-Train")
-
-# Create ROC curves
-createROC('XGB-train', y_train, y_pred_values_train, modelName = modelName)
-createROC('XGB-test', y_test, y_pred_values, modelName = modelName)
-
-# Create precision curves
-drawPrecision(X_train, y_train, y_pred_values_train, modelName = modelName, title = 'XGB-train')
-drawPrecision(X_test, y_test, y_pred_values,  modelName = modelName, title = 'XGB-test')
 
 # evaluate predictions
 evaluateFile = open(modelName + '/evaluation.dat', 'w')
@@ -99,6 +87,18 @@ if reconstuct == "T":
     saveHistograms(FP, TP, TN, FN, modelName)
     reconstructionTest2D(FP, TP, modelName = modelName, title = 'IEC - XGB test recostrucion (TP + FP)')
     angleVsTime(FP, TP, TN, FN, modelName)
+
+    # Create precision curves
+    drawPrecision(X_train, y_train, y_pred_values_train, modelName = modelName, title = 'XGB-train')
+    drawPrecision(X_test, y_test, y_pred_values,  modelName = modelName, title = 'XGB-test')
+
+    # Create predictions distributions
+    predictionsDistribution(y_test, y_pred_values, modelName = modelName, title = "IEC-" + modelName + "-Test")
+    predictionsDistribution(y_train, y_pred_values_train, modelName = modelName, title = "IEC-" + modelName + "-Train")
+
+    # Create ROC curves
+    createROC('XGB-train', y_train, y_pred_values_train, modelName = modelName)
+    createROC('XGB-test', y_test, y_pred_values, modelName = modelName)
 
     plot_importance(bestXGB)
     plt.savefig(modelName + "/featureImportance.png")
