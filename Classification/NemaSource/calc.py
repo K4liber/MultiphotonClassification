@@ -326,14 +326,14 @@ def predictionsDistribution(y, y_pred, modelName, title):
     plt.legend(loc = "upper center")
     plt.savefig(getWorkingDir() + modelName + "/predictionDistribution" + title + ".png")
 
-def drawPrecision(X, y, y_pred, modelName, title = 'XGB-train'):
+def drawPrecision(X, y, y_pred, modelName, title = 'XGB-train', points = 20):
     plt.clf()
     points = pd.DataFrame(columns = ["recall", "precision", "threshold"])
     pPsOrginalPositive = X[y > 0]
     pPsOrginalNegative = X[y == 0]
 
-    for i in range(201):
-        threshold = i/200.0
+    for i in range(points + 1.0):
+        threshold = i/points
         pPsPredictedPositive = X[y_pred >= threshold]
         pPsPredictedNegative = X[y_pred < threshold]
 
