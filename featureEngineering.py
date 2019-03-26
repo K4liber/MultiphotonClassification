@@ -9,7 +9,7 @@ import sys
 pathToData = '/media/jasiek/F686ACAE86AC7133/Dokumenty/Studia/PracaMagisterska/Nema_Image_Quality/3000s/'
 if sys.argv[2] == 'K': pathToData = '/mnt/home/jbielecki1/NEMA/'
 part = sys.argv[1] # part form "00" to "18"
-fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_REPAIRED_'
+fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_'
 
 def dataFrameNames():
     return [
@@ -49,7 +49,7 @@ def featureEngineering(row):
     rY1 = (row['y1'] + row['y2'])/2 - dY
     rZ1 = (row['z1'] + row['z2'])/2 - dZ
     rError = math.sqrt((row['sX1'] - rX1)**2 + (row['sY1'] - rY1)**2 + (row['sZ1'] - rZ1)**2)
-    volD = row['vol1'] - row['vol2']
+    volD = abs(abs(192 - row['vol1']) - abs(192 - row['vol2'])) # 384 scintillators
     lorL = 2 * LORHalfSize
     cos3D = (row['x1']*row['x2']+row['y1']*row['y2']+row['z1']*row['z2'])/ \
             (math.sqrt(row['x1']**2+row['y1']**2+row['z1']**2)*math.sqrt(row['x2']**2+row['y2']**2+row['z2']**2))
@@ -78,6 +78,6 @@ def featureEngineering(row):
         eSum    # Sum of the detecions energies
     )
 
-data = pd.read_csv(pathToData + fileName + "part" + part, sep = "\t", names=dataFrameNames())
+data = pd.read_csv(pathToData + fileName + "REPAIRED_part" + part, sep = "\t", names=dataFrameNames())
 data[['dt','rX1','rY1','rZ1','rError','volD','lorL','deg3D','deg2D','rL','eSum']] = data.apply(lambda row: pd.Series(featureEngineering(row)), axis=1)
 pickle.dump(data, open(pathToData + fileName + 'PREPARED_part' + part, 'wb'))
