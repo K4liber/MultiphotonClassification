@@ -49,7 +49,7 @@ def featureEngineering(row):
     rY1 = (row['y1'] + row['y2'])/2 - dY
     rZ1 = (row['z1'] + row['z2'])/2 - dZ
     rError = math.sqrt((row['sX1'] - rX1)**2 + (row['sY1'] - rY1)**2 + (row['sZ1'] - rZ1)**2)
-    volD = abs(abs(192 - row['vol1']) - abs(192 - row['vol2'])) # 384 scintillators
+    volD = min([(row['vol1'] - row['vol2'])%384, (row['vol2'] - row['vol1'])%384]) # 384 scintillators
     lorL = 2 * LORHalfSize
     cos3D = (row['x1']*row['x2']+row['y1']*row['y2']+row['z1']*row['z2'])/ \
             (math.sqrt(row['x1']**2+row['y1']**2+row['z1']**2)*math.sqrt(row['x2']**2+row['y2']**2+row['z2']**2))
