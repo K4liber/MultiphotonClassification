@@ -58,7 +58,7 @@ def createLearningBatches(filePath, size):
             sep = "\t", names = dataFrameNames()
         )
     else:
-        df = pd.read_csv(filePath + "00", sep = "\t", names = dataFrameNames()).head(size)
+        df = pickle.load(open(filePath + '00', 'rb'))
     
     codes = {1:1, 2:0, 3:0, 4:0}
     df["newClass"] = df["class"].map(codes)
