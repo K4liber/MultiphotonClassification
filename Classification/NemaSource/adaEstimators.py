@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 import sys
 
+directory = '/mnt/home/jbielecki1/NEMA/190000000/'
+
 def loadData():
-    directory = '/mnt/home/jbielecki1/NEMA/190000000/'
     global X_train, X_test, y_train, y_test, class_test, class_train
     X_train = pickle.load(open(directory + 'xTrain', 'rb'))
     X_test = pickle.load(open(directory + 'xTest', 'rb'))
@@ -22,8 +23,22 @@ def loadData():
     y_test.drop(["class"], axis = 1)
     y_test.columns = ['class']
 
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
+
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(mypath)
+    except OSError as exc: # Python >2.5
+        if exc.errno == EEXIST and path.isdir(mypath):
+            pass
+        else: raise
+
 modelName = "ADA19e7"
 loadData()
+mkdir_p(directory + modelName)
 max_depth = int(sys.argv[1])
 n_estimators = 2000
 model = AdaBoostClassifier(
@@ -44,7 +59,7 @@ for test_predicts, train_predicts in zip(
         1. - accuracy_score(train_predicts, y_train))
 
 # save model to file
-pickle.dump(model, open(modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat", "wb"), protocol=4)
+pickle.dump(model, open(directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat", "wb"), protocol=4)
 
 bestAccuracy = 1.0 - min(test_errors)
 bestNEstimators = test_errors.index(min(test_errors))
