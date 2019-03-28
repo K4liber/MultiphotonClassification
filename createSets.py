@@ -52,7 +52,7 @@ def mkdir_p(mypath):
 
 def createLearningBatches(filePath, size):
     if size > 10000000:
-        from dask_ml.model_selection import train_test_split
+        # from dask_ml.model_selection import train_test_split
         df = dd.read_csv(
             filePath + '*', 
             sep = "\t", names = dataFrameNames()
@@ -64,7 +64,7 @@ def createLearningBatches(filePath, size):
     df["newClass"] = df["class"].map(codes)
     x = df.drop(["t1", "t2", "sX1", "sY1", "sZ1", "class", "rError"], axis = 1)
     y = df[["class", "newClass"]]
-    xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.2, train_size = 0.8, random_state = 42)
+    xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.2, train_size = 0.8, random_state = 42, stratify = y)
     print("Batches created successfully!")
     return xTrain, xTest, yTrain, yTest
 
