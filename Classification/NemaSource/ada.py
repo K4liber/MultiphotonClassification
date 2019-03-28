@@ -84,14 +84,7 @@ plot_confusion_matrix(
     modelName = modelName
 )
 
-# save model
 pickle.dump(model, open(modelName + "/ADAmodel.dat", "wb"))
-# plot single tree
-# fig = plt.figure()
-# fig.set_size_inches(3600, 2400)
-# ax = plot_tree(clf.best_estimator_, rankdir='LR')
-# plt.tight_layout()
-# plt.savefig(modelName + "/bestTree.png", dpi = 600)
 
 if reconstuct == "T":
     pPsOrginalPositive = X_test[y_test > 0]

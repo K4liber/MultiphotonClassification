@@ -9,18 +9,17 @@ from sklearn.metrics import accuracy_score
 import sys
 
 def loadData():
-    # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
-    directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
-    fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
-    global df, X_train, X_test, y_train, y_test
-    df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 10000000)
-    y_train = np.ravel(y_train)
-    y_test = np.ravel(y_test)
+    directory = '/mnt/home/jbielecki1/NEMA/190000000/'
+    global X_train, X_test, y_train, y_test
+    X_train = pickle.load(open(directory + 'xTrain', 'rb'))
+    X_test = pickle.load(open(directory + 'xTest', 'rb'))
+    y_train = pickle.load(open(directory + 'yTrain', 'rb'))
+    y_test = pickle.load(open(directory + 'yTest', 'rb'))
 
-modelName = "ADA10e7"
+modelName = "ADA19e7"
 loadData()
 max_depth = int(sys.argv[1])
-n_estimators = 1500
+n_estimators = 2000
 model = AdaBoostClassifier(
     base_estimator = DecisionTreeClassifier(max_depth = max_depth),
     n_estimators = n_estimators,
@@ -39,7 +38,7 @@ for test_predicts, train_predicts in zip(
         1. - accuracy_score(train_predicts, y_train))
 
 # save model to file
-pickle.dump(model, open(modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat", "wb"))
+pickle.dump(model, open(modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat", "wb"), protocol=4)
 
 bestAccuracy = 1.0 - min(test_errors)
 bestNEstimators = test_errors.index(min(test_errors))
