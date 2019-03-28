@@ -52,15 +52,15 @@ def mkdir_p(mypath):
 
 def createLearningBatches(filePath, size):
     if size > 10000000:
-        dFrames = pd.DataFrame(columns = dataFrameNames())
+        df = pd.DataFrame(columns = dataFrameNames())
 
         for i in range(10):
             dfPart = pickle.load(open(filePath + '0' + str(i), 'rb'))
-            dFrames = dFrames.append(dfPart)
+            df = df.append(dfPart)
 
         for i in range(9):
             dfPart = pickle.load(open(filePath + '1' + str(i), 'rb'))
-            dFrames = dFrames.append(dfPart)
+            df = df.append(dfPart)
     else:
         df = pickle.load(open(filePath + '00', 'rb')).head(size)
     
