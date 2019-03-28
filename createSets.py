@@ -61,8 +61,6 @@ def createLearningBatches(filePath, size):
         for i in range(9):
             dfPart = pickle.load(open(filePath + '1' + str(i), 'rb'))
             dFrames = dFrames.append(dfPart)
-
-        df = pd.concat(dFrames)
     else:
         df = pickle.load(open(filePath + '00', 'rb')).head(size)
     
