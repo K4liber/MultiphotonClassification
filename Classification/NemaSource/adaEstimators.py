@@ -2,7 +2,6 @@
 
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
-from calc import *
 import pickle
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
