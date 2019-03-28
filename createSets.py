@@ -64,7 +64,7 @@ def createLearningBatches(filePath, size):
 
         df = pd.concat(dFrames)
     else:
-        df = pickle.load(open(filePath + '00', 'rb'))
+        df = pickle.load(open(filePath + '00', 'rb')).head(size)
     
     codes = {1:1, 2:0, 3:0, 4:0}
     df["newClass"] = df["class"].map(codes)
