@@ -52,11 +52,17 @@ def mkdir_p(mypath):
 
 def createLearningBatches(filePath, size):
     if size > 10000000:
-        # from dask_ml.model_selection import train_test_split
-        df = dd.read_csv(
-            filePath + '*', 
-            sep = "\t", names = dataFrameNames()
-        )
+        dFrames = []
+
+        for i in range(10):
+            dfPart = pickle.load(open(filePath + '0' + str(i), 'rb'))
+            dFrames = dFrames.append(dfPart)
+
+        for i in range(9):
+            dfPart = pickle.load(open(filePath + '1' + str(i), 'rb'))
+            dFrames = dFrames.append(dfPart)
+
+        df = pd.concat(dFrames)
     else:
         df = pickle.load(open(filePath + '00', 'rb'))
     
