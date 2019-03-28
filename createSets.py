@@ -1,4 +1,4 @@
-#!/bin/usr/env python3.6
+#!/usr/bin/env python3.6
 
 import dask.dataframe as dd
 import pandas as pd
