@@ -10,11 +10,17 @@ import sys
 
 def loadData():
     directory = '/mnt/home/jbielecki1/NEMA/190000000/'
-    global X_train, X_test, y_train, y_test
+    global X_train, X_test, y_train, y_test, class_test, class_train
     X_train = pickle.load(open(directory + 'xTrain', 'rb'))
     X_test = pickle.load(open(directory + 'xTest', 'rb'))
     y_train = pickle.load(open(directory + 'yTrain', 'rb'))
     y_test = pickle.load(open(directory + 'yTest', 'rb'))
+    class_test = y_test[["class"]]
+    class_train = y_train[["class"]]
+    y_train.drop(["class"], axis = 1)
+    y_train.columns = ['class']
+    y_test.drop(["class"], axis = 1)
+    y_test.columns = ['class']
 
 modelName = "ADA19e7"
 loadData()
