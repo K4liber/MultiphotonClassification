@@ -50,15 +50,15 @@ def mkdir_p(mypath):
             pass
         else: raise
 
-def createLearningBatches(fileName, size):
+def createLearningBatches(filePath, size):
     if size > 10000000:
         from dask_ml.model_selection import train_test_split
         df = dd.read_csv(
-            fileName + '*', 
+            filePath + '*', 
             sep = "\t", names = dataFrameNames()
         )
     else:
-        df = pd.read_csv(fileName + "00", sep = "\t", names = dataFrameNames()).head(size)
+        df = pd.read_csv(filePath + "00", sep = "\t", names = dataFrameNames()).head(size)
     
     codes = {1:1, 2:0, 3:0, 4:0}
     df["newClass"] = df["class"].map(codes)
@@ -72,7 +72,7 @@ dataSize = int(sys.argv[1])
 directory = '/mnt/home/jbielecki1/NEMA/'
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_PREPARED_part'
 mkdir_p(directory + str(dataSize))
-xTrain, xTest, yTrain, yTest = createLearningBatches(fileName, dataSize)
+xTrain, xTest, yTrain, yTest = createLearningBatches(directory + fileName, dataSize)
 pickle.dump(xTest, open(directory + str(dataSize) + "/xTest", 'wb'))
 pickle.dump(xTrain, open(directory + str(dataSize) + "/xTrain", 'wb'))
 pickle.dump(yTest, open(directory + str(dataSize) + "/yTest", 'wb'))
