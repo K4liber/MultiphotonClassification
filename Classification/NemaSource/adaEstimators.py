@@ -17,10 +17,8 @@ def loadData():
     y_test = pickle.load(open(directory + 'yTest', 'rb'))
     class_test = y_test[["class"]]
     class_train = y_train[["class"]]
-    y_train.drop(["class"], axis = 1)
-    y_train.columns = ['class']
-    y_test.drop(["class"], axis = 1)
-    y_test.columns = ['class']
+    y_train = y_train[['newClass']]
+    y_test = y_test[['newClass']]
 
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
