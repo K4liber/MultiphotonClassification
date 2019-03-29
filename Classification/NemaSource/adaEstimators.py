@@ -6,15 +6,16 @@ import pickle
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 import sys
+import dask.dataframe as dd
 
 directory = '/mnt/home/jbielecki1/NEMA/190000000/'
 
 def loadData():
     global X_train, X_test, y_train, y_test, class_test, class_train
-    X_train = pickle.load(open(directory + 'xTrain', 'rb'))
-    X_test = pickle.load(open(directory + 'xTest', 'rb'))
-    y_train = pickle.load(open(directory + 'yTrain', 'rb'))
-    y_test = pickle.load(open(directory + 'yTest', 'rb'))
+    X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')))
+    X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')))
+    y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')))
+    y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')))
     class_test = y_test[["class"]]
     class_train = y_train[["class"]]
     y_train = y_train[['newClass']]
