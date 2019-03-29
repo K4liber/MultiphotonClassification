@@ -8,7 +8,9 @@ from sklearn.metrics import accuracy_score
 import sys
 import dask.dataframe as dd
 
-directory = '/mnt/home/jbielecki1/NEMA/190000000/'
+dataSize = int(sys.argv[2])
+max_depth = int(sys.argv[1])
+directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
 
 def loadData():
     global X_train, X_test, y_train, y_test, class_test, class_train
@@ -37,7 +39,6 @@ def mkdir_p(mypath):
 modelName = "ADA"
 loadData()
 mkdir_p(directory + modelName)
-max_depth = int(sys.argv[1])
 n_estimators = 2000
 model = AdaBoostClassifier(
     base_estimator = DecisionTreeClassifier(max_depth = max_depth),
