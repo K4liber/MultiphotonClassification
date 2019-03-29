@@ -66,7 +66,7 @@ def createLearningBatches(filePath, size):
     
     codes = {1:1, 2:0, 3:0, 4:0}
     df["newClass"] = df["class"].map(codes)
-    x = df.drop(["t1", "t2", "sX1", "sY1", "sZ1", "class", "rError"], axis = 1)
+    x = df.drop(["t1", "t2", "sX1", "sY1", "sZ1", "class", "rError", "newClass"], axis = 1)
     y = df[["class", "newClass"]]
     xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.2, train_size = 0.8, random_state = 42, stratify = y)
     print("Batches created successfully!")
