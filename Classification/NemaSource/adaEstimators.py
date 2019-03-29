@@ -12,10 +12,10 @@ directory = '/mnt/home/jbielecki1/NEMA/190000000/'
 
 def loadData():
     global X_train, X_test, y_train, y_test, class_test, class_train
-    X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')))
-    X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')))
-    y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')))
-    y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')))
+    X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')), npartitions = 5)
+    X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 5)
+    y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')), npartitions = 5)
+    y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')), npartitions = 5)
     class_test = y_test[["class"]]
     class_train = y_train[["class"]]
     y_train = y_train[['newClass']]
