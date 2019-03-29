@@ -20,8 +20,8 @@ def loadData():
     y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')), npartitions = 10)
     class_test = y_test[["class"]]
     class_train = y_train[["class"]]
-    y_train = y_train[['newClass']]
-    y_test = y_test[['newClass']]
+    y_train = y_train[['newClass']].values.ravel()
+    y_test = y_test[['newClass']].values.ravel()
 
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
