@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 import sys
 import dask.dataframe as dd
+import numpy as np
 
 dataSize = int(sys.argv[2])
 max_depth = int(sys.argv[1])
@@ -18,10 +19,10 @@ def loadData():
     X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 10)
     y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')), npartitions = 10)
     y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')), npartitions = 10)
-    class_test = y_test[["class"]]
-    class_train = y_train[["class"]]
-    y_train = y_train[['newClass']].values.ravel()
-    y_test = y_test[['newClass']].values.ravel()
+    class_test = y_test[["class"]].to_dask_array()
+    class_train = y_train[["class"]].to_dask_array()
+    y_train = y_train[['newClass']].to_dask_array()
+    y_test = y_test[['newClass']].to_dask_array()
 
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
@@ -39,7 +40,7 @@ def mkdir_p(mypath):
 modelName = "ADA"
 loadData()
 mkdir_p(directory + modelName)
-n_estimators = 2000
+n_estimators = 10
 model = AdaBoostClassifier(
     base_estimator = DecisionTreeClassifier(max_depth = max_depth),
     n_estimators = n_estimators,
@@ -47,27 +48,24 @@ model = AdaBoostClassifier(
 )
 model.fit(X_train, y_train)
 
-test_errors = []
-train_errors = []
+test_accuracy = []
+train_accuracy = []
 
-for test_predicts, train_predicts in zip(
-        model.staged_predict(X_test), model.staged_predict(X_train)):
-    test_errors.append(
-        1. - accuracy_score(test_predicts, y_test))
-    train_errors.append(
-        1. - accuracy_score(train_predicts, y_train))
+for test_predicts, train_predicts in zip(model.staged_predict(X_test), model.staged_predict(X_train)):
+    test_accuracy.append(accuracy_score(test_predicts, np.array(y_test)))
+    train_accuracy.append(accuracy_score(train_predicts, np.array(y_train)))
 
 # save model to file
 pickle.dump(model, open(directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat", "wb"), protocol=4)
 
-bestAccuracy = 1.0 - min(test_errors)
-bestNEstimators = test_errors.index(min(test_errors))
+bestAccuracy = max(test_accuracy)
+bestNEstimators = test_accuracy.index(max(test_accuracy))
 # Plot the results
-plt.plot(train_errors, label = "błąd treningowy")
-plt.plot(test_errors, label = "błąd testowy")
+plt.plot(train_errors, label = "skuteczność - trening")
+plt.plot(test_errors, label = "skuteczność - test")
 plt.xlabel("liczba drzew")
-plt.ylabel("odsetek błędnie sklasyfikowanych próbek")
-plt.title("AdaBoost error (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
+plt.ylabel("odsetek poprawnie sklasyfikowanych próbek")
+plt.title("AdaBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
 plt.legend(loc = "upper right")
 plt.savefig(directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".png")
 plt.clf()
