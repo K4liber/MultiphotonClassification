@@ -40,7 +40,7 @@ def mkdir_p(mypath):
 modelName = "ADA"
 loadData()
 mkdir_p(directory + modelName)
-n_estimators = 10
+n_estimators = 1000
 model = AdaBoostClassifier(
     base_estimator = DecisionTreeClassifier(max_depth = max_depth),
     n_estimators = n_estimators,
@@ -61,8 +61,8 @@ pickle.dump(model, open(directory + modelName + "/adaEstimators" + str(n_estimat
 bestAccuracy = max(test_accuracy)
 bestNEstimators = test_accuracy.index(max(test_accuracy))
 # Plot the results
-plt.plot(train_accuracy, label = "skuteczność - trening")
-plt.plot(test_accuracy, label = "skuteczność - test")
+plt.plot([i+1 for i in range(train_accuracy)], train_accuracy, label = "skuteczność - trening")
+plt.plot([i+1 for i in range(test_accuracy)], test_accuracy, label = "skuteczność - test")
 plt.xlabel("liczba drzew")
 plt.ylabel("odsetek poprawnie sklasyfikowanych próbek")
 plt.title("AdaBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
