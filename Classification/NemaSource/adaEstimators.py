@@ -61,8 +61,8 @@ pickle.dump(model, open(directory + modelName + "/adaEstimators" + str(n_estimat
 bestAccuracy = max(test_accuracy)
 bestNEstimators = test_accuracy.index(max(test_accuracy))
 # Plot the results
-plt.plot(train_errors, label = "skuteczność - trening")
-plt.plot(test_errors, label = "skuteczność - test")
+plt.plot(train_accuracy, label = "skuteczność - trening")
+plt.plot(test_accuracy, label = "skuteczność - test")
 plt.xlabel("liczba drzew")
 plt.ylabel("odsetek poprawnie sklasyfikowanych próbek")
 plt.title("AdaBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
