@@ -8,6 +8,7 @@ from sklearn.metrics import accuracy_score
 import sys
 import dask.dataframe as dd
 import numpy as np
+import os
 
 dataSize = int(sys.argv[2])
 max_depth = int(sys.argv[1])
@@ -41,12 +42,17 @@ modelName = "ADA"
 loadData()
 mkdir_p(directory + modelName)
 n_estimators = 1000
-model = AdaBoostClassifier(
-    base_estimator = DecisionTreeClassifier(max_depth = max_depth),
-    n_estimators = n_estimators,
-    learning_rate = 0.2
-)
-model.fit(X_train, y_train)
+modelFilePath = directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat"
+
+if os.path.isfile(modelFilePath):
+    model = pickle.load(open(modelFilePath), 'rb')
+else:
+    model = AdaBoostClassifier(
+        base_estimator = DecisionTreeClassifier(max_depth = max_depth),
+        n_estimators = n_estimators,
+        learning_rate = 0.2
+    )
+    model.fit(X_train, y_train)
 
 test_accuracy = []
 train_accuracy = []
@@ -56,13 +62,13 @@ for test_predicts, train_predicts in zip(model.staged_predict(X_test), model.sta
     train_accuracy.append(accuracy_score(train_predicts, np.array(y_train)))
 
 # save model to file
-pickle.dump(model, open(directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat", "wb"), protocol=4)
+pickle.dump(model, open(modelFilePath, "wb"), protocol=4)
 
 bestAccuracy = max(test_accuracy)
 bestNEstimators = test_accuracy.index(max(test_accuracy))
 # Plot the results
-plt.plot([i+1 for i in range(train_accuracy)], train_accuracy, label = "skuteczność - trening")
-plt.plot([i+1 for i in range(test_accuracy)], test_accuracy, label = "skuteczność - test")
+plt.plot([i+1 for i in range(len(train_accuracy))], train_accuracy, label = "skuteczność - trening")
+plt.plot([i+1 for i in range(len(test_accuracy))], test_accuracy, label = "skuteczność - test")
 plt.xlabel("liczba drzew")
 plt.ylabel("odsetek poprawnie sklasyfikowanych próbek")
 plt.title("AdaBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
