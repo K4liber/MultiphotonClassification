@@ -42,10 +42,10 @@ modelName = "ADA"
 loadData()
 mkdir_p(directory + modelName)
 n_estimators = 1000
-modelFilePath = directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat"
+modelFilePath = directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth)
 
 if os.path.isfile(modelFilePath):
-    model = pickle.load(open(modelFilePath, 'rb'))
+    model = pickle.load(open(modelFilePath + ".dat", 'rb'))
 else:
     model = AdaBoostClassifier(
         base_estimator = DecisionTreeClassifier(max_depth = max_depth),
@@ -73,5 +73,5 @@ plt.xlabel("liczba drzew")
 plt.ylabel("odsetek poprawnie sklasyfikowanych próbek")
 plt.title("AdaBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
 plt.legend(loc = "upper right")
-plt.savefig(directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".png")
+plt.savefig(modelFilePath + ".png")
 plt.clf()
