@@ -45,7 +45,7 @@ n_estimators = 1000
 modelFilePath = directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth) + ".dat"
 
 if os.path.isfile(modelFilePath):
-    model = pickle.load(open(modelFilePath), 'rb')
+    model = pickle.load(open(modelFilePath, 'rb'))
 else:
     model = AdaBoostClassifier(
         base_estimator = DecisionTreeClassifier(max_depth = max_depth),
