@@ -23,7 +23,7 @@ def dataFrameNames():
         "class",  # Type of coincidence(1-true, 2-phantom-scattered, 3-detector-scattered, 4-accidental)
         "sX1",    # 1 gamma emission x position [cm]
         "sY1",    # 1 gamma emission y position [cm]
-        "sZ1"     # 1 gamma emission z position [cm]
+        "sZ1",    # 1 gamma emission z position [cm]
         "dt",     # Detection times difference
         "rX1",    # Reconstruction point - X cord
         "rY1",    # Reconstruction point - Y cord
@@ -65,7 +65,6 @@ def createLearningBatches(filePath, size):
         df = pickle.load(open(filePath + '00', 'rb')).head(size)
     
     codes = {1:1, 2:0, 3:0, 4:0}
-    df.dropna(inplace = True)
     df["newClass"] = df["class"].map(codes)
     x = df.drop(["t1", "t2", "sX1", "sY1", "sZ1", "class", "rError", "newClass"], axis = 1)
     y = df[["class", "newClass"]]
