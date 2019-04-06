@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.6
 
-import xgboost as xgb
+from xgboost import XGBClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 import pickle
