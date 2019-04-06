@@ -31,9 +31,9 @@ model = XGBClassifier(
 )
 
 param_dist = {
-    'n_estimators': stats.randint(50, 200), # Number of trees in each classifier
-    'learning_rate': stats.uniform(0.15, 0.05), # Contribution of each estimator
-    'max_depth': [5, 6, 7, 8, 9, 10, 11], # Maximum depth of a tree
+    'n_estimators': stats.randint(1000, 200), # Number of trees in each classifier
+    'learning_rate': stats.uniform(0.25, 0.15), # Contribution of each estimator
+    'max_depth': [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], # Maximum depth of a tree
     'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1], # The fraction of columns to be subsampled
     'min_child_weight': [1, 2, 3, 4]    # Minimum sum of instance weight (hessian) needed in a child 8
                                         # In linear regression task, this simply corresponds to minimum 
@@ -43,7 +43,7 @@ param_dist = {
 clf = RandomizedSearchCV(
     model,
     param_distributions = param_dist,  
-    n_iter = 5, 
+    n_iter = 10, 
     cv = 3, # Cross-validation number of folds
     scoring = 'roc_auc', 
     error_score = 0, 

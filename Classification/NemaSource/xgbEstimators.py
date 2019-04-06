@@ -1,65 +1,83 @@
 #!/usr/bin/env python3.6
 
 import xgboost as xgb
-from calc import *
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
 import pickle
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 import sys
+import dask.dataframe as dd
+import numpy as np
+import os
 
-modelName = "XGB10e7"
-# Load and transform data into sets 
+dataSize = int(sys.argv[2])
+max_depth = int(sys.argv[1])
+directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
+
 def loadData():
-    # directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
-    directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
-    fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
-    global df, X_train, X_test, y_train, y_test
-    df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 1000)
-    y_train = np.ravel(y_train)
-    y_test = np.ravel(y_test)
+    global X_train, X_test, y_train, y_test, class_test, class_train
+    X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')), npartitions = 10)
+    X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 10)
+    y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')), npartitions = 10)
+    y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')), npartitions = 10)
+    class_test = y_test[["class"]].to_dask_array()
+    class_train = y_train[["class"]].to_dask_array()
+    y_train = y_train[['newClass']].to_dask_array()
+    y_test = y_test[['newClass']].to_dask_array()
 
-# Load and transform data into sets 
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
+
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(mypath)
+    except OSError as exc: # Python >2.5
+        if exc.errno == EEXIST and path.isdir(mypath):
+            pass
+        else: raise
+
+modelName = "XGB"
 loadData()
-# Load model
-bestXGB = pickle.load(open('XGB10e7/bestXGB.dat', 'rb'))
-maxEstimators = 1500
-max_depth = sys.argv[1]
-bestXGB.set_params(**{'n_estimators': maxEstimators, 'max_depth': max_depth})
-# Train and test the model
-eval_set  = [( X_train, y_train), ( X_test, y_test)]
-results = {}
-bestXGB.fit(
-    X_train, y_train,
-    early_stopping_rounds = 20,
-    eval_set = eval_set,
-    eval_metric = ["error", "logloss"],
-    callbacks = [xgb.callback.record_evaluation(results)]
-)
+mkdir_p(directory + modelName)
+n_estimators = 2000
+modelFilePath = directory + modelName + "/xgbEstimators" + str(n_estimators) + "Depth" + str(max_depth)
 
-# Make predictions for test data
-y_pred = bestXGB.predict(X_test)
-predictions = [round(value) for value in y_pred]
-accuracy = accuracy_score(y_test, predictions)
+if os.path.isfile(modelFilePath):
+    model = pickle.load(open(modelFilePath + ".dat", 'rb'))
+else:
+    model = XGBClassifier(
+        objective = 'binary:logistic', # Logistic regression for binary classification, output probability
+        booster = 'gbtree', # Set estimator as gradient boosting tree
+        subsample = 1, # Percentage of the training samples used to train (consider this)
+        n_estimators = n_estimators, # Number of trees in each classifier
+        learning_rate = 0.2, # Contribution of each estimator
+        max_depth = max_depth, # Maximum depth of a tree
+        colsample_bytree = 0.6, # The fraction of columns to be subsampled
+    )
+    model.fit(X_train, y_train, early_stopping_rounds = 10)
+
+test_accuracy = []
+train_accuracy = []
+
+for test_predicts, train_predicts in zip(model.staged_predict(X_test), model.staged_predict(X_train)):
+    test_accuracy.append(accuracy_score(test_predicts, np.array(y_test)))
+    train_accuracy.append(accuracy_score(train_predicts, np.array(y_train)))
 
 # save model to file
-pickle.dump(bestXGB, open(modelName + "/xgbMAX_DEPTH" + str(max_depth) + ".dat", "wb"))
+pickle.dump(model, open(modelFilePath, "wb"), protocol=4)
 
+bestAccuracy = max(test_accuracy)
+bestNEstimators = test_accuracy.index(max(test_accuracy))
 # Plot the results
-n = range(maxEstimators)
-plt.plot(results['validation_0']['error'], label = "błąd treningowy")
-plt.plot(results['validation_1']['error'], label = "błąd testowy")
+plt.plot([i+1 for i in range(len(train_accuracy))], train_accuracy, label = "skuteczność - trening")
+plt.plot([i+1 for i in range(len(test_accuracy))], test_accuracy, label = "skuteczność - test")
 plt.xlabel("liczba drzew")
-plt.ylabel("odsetek błędnie sklasyfikowanych próbek")
-plt.title("XGBoost error (max_depth = " + max_depth + ", best accuracy: " + str(accuracy) + ")")
+plt.ylabel("odsetek poprawnie sklasyfikowanych próbek")
+plt.title("XGBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
 plt.legend(loc = "upper right")
-plt.savefig("xgbEstimatorsError" + max_depth + ".png")
+plt.savefig(modelFilePath + ".png")
 plt.clf()
 
-plt.plot(results['validation_0']['logloss'], label = "błąd treningowy")
-plt.plot(results['validation_1']['logloss'], label = "błąd testowy")
-plt.xlabel("liczba drzew")
-plt.ylabel("log loss")
-plt.title("XGBoost log loss (max_depth: " + max_depth + ")")
-plt.legend(loc = "upper right")
-plt.savefig("xgbEstimatorsLoss" + max_depth + ".png")
-plt.clf()
