@@ -57,7 +57,7 @@ else:
         max_depth = max_depth, # Maximum depth of a tree
         colsample_bytree = 0.6, # The fraction of columns to be subsampled
     )
-    model.fit(X_train, y_train, early_stopping_rounds = 10, eval_set=[(test_X, test_y)])
+    model.fit(X_train, y_train, early_stopping_rounds = 10, eval_set=[(X_test, y_test)])
 
 test_accuracy = []
 train_accuracy = []
