@@ -62,7 +62,7 @@ else:
     model.fit(
         X_train, y_train, 
         early_stopping_rounds = 10, 
-        eval_set=[(X_test, y_test)],
+        eval_set = eval_set,
         eval_metric = ["error"],
         callbacks = [xgb.callback.record_evaluation(results)]
     )
