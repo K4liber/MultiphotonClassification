@@ -61,14 +61,14 @@ else:
     eval_set = [( X_train, y_train), ( X_test, y_test)]
     model.fit(
         X_train, y_train, 
-        early_stopping_rounds = 10, 
+        early_stopping_rounds = 20, 
         eval_set = eval_set,
         eval_metric = ["error"],
         callbacks = [xgb.callback.record_evaluation(results)]
     )
 
-train_accuracy = results['validation_0']['error']
-test_accuracy = results['validation_1']['error']
+train_accuracy = [ 1.0 - x for x in results['validation_0']['error'] ]
+test_accuracy = [ 1.0 - x for x in results['validation_1']['error'] ]
 
 # save model to file
 pickle.dump(model, open(modelFilePath, "wb"), protocol=4)
