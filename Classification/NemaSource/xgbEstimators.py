@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.6
 
-from xgboost import XGBClassifier
+import xgboost as xgb
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 import pickle
@@ -48,7 +48,7 @@ modelFilePath = directory + modelName + "/xgbEstimators" + str(n_estimators) + "
 if os.path.isfile(modelFilePath):
     model = pickle.load(open(modelFilePath + ".dat", 'rb'))
 else:
-    model = XGBClassifier(
+    model = xgb.XGBClassifier(
         objective = 'binary:logistic', # Logistic regression for binary classification, output probability
         booster = 'gbtree', # Set estimator as gradient boosting tree
         subsample = 1, # Percentage of the training samples used to train (consider this)
@@ -64,7 +64,7 @@ else:
         early_stopping_rounds = 10, 
         eval_set=[(X_test, y_test)],
         eval_metric = ["error"],
-        callbacks = [XGBClassifier.callback.record_evaluation(results)]
+        callbacks = [xgb.callback.record_evaluation(results)]
     )
 
 train_accuracy = results['validation_0']['error']
