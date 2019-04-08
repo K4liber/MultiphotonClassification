@@ -57,14 +57,18 @@ else:
         max_depth = max_depth, # Maximum depth of a tree
         colsample_bytree = 0.6, # The fraction of columns to be subsampled
     )
-    model.fit(X_train, y_train, early_stopping_rounds = 10, eval_set=[(X_test, y_test)])
+    results = {}
+    eval_set = [( X_train, y_train), ( X_test, y_test)]
+    model.fit(
+        X_train, y_train, 
+        early_stopping_rounds = 10, 
+        eval_set=[(X_test, y_test)],
+        eval_metric = ["error"],
+        callbacks = [XGBClassifier.callback.record_evaluation(results)]
+    )
 
-test_accuracy = []
-train_accuracy = []
-
-for test_predicts, train_predicts in zip(model.staged_predict(X_test), model.staged_predict(X_train)):
-    test_accuracy.append(accuracy_score(test_predicts, np.array(y_test)))
-    train_accuracy.append(accuracy_score(train_predicts, np.array(y_train)))
+train_accuracy = results['validation_0']['error']
+test_accuracy = results['validation_1']['error']
 
 # save model to file
 pickle.dump(model, open(modelFilePath, "wb"), protocol=4)
