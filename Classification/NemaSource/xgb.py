@@ -78,8 +78,9 @@ clf = RandomizedSearchCV(
 clf.fit(
     X_train, 
     y_train,
-    eval_set = [(X_test, y_test)],
-    early_stopping_rounds = 25
+    early_stopping_rounds = 25,
+    eval_metric = "logloss",
+    eval_set = [(X_test, y_test)]
 )
 
 # make predictions for test data
