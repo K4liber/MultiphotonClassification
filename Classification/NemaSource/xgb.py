@@ -70,14 +70,17 @@ clf = RandomizedSearchCV(
     n_iter = 20, 
     cv = 3, # Cross-validation number of folds
     scoring = 'roc_auc',
-    eval_set = [(X_test, y_test)],
-    early_stopping_rounds = 25,
     error_score = 0, 
     verbose = 2, 
     n_jobs = -1
 )
 
-clf.fit(X_train, y_train)
+clf.fit(
+    X_train, 
+    y_train,
+    eval_set = [(X_test, y_test)],
+    early_stopping_rounds = 25
+)
 
 # make predictions for test data
 y_pred_values = clf.predict(X_test)
