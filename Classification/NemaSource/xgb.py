@@ -13,27 +13,51 @@ from xgboost import plot_tree
 from sklearn.metrics import confusion_matrix
 import pickle
 
-modelName = "XGB10e7"
-mkdir_p(modelName)
-# Load and transform data into sets 
-directory = '/home/jasiek/Desktop/Studia/PracaMagisterska/Nema_Image_Quality/'
-# directory = '/mnt/opt/groups/jpet/NEMA_Image_Quality/3000s/'
-fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_part00'
-df, X_train, X_test, y_train, y_test = createLearningBatches(directory + fileName, 1000)
-y_train = np.ravel(y_train)
-y_test = np.ravel(y_test)
+dataSize = int(sys.argv[2])
+max_depth = int(sys.argv[1])
+directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
+
+def loadData():
+    global X_train, X_test, y_train, y_test, class_test, class_train
+    X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')), npartitions = 10)
+    X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 10)
+    y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')), npartitions = 10)
+    y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')), npartitions = 10)
+    class_test = y_test[["class"]].to_dask_array()
+    class_train = y_train[["class"]].to_dask_array()
+    y_train = y_train[['newClass']].to_dask_array()
+    y_test = y_test[['newClass']].to_dask_array()
+
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
+
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(mypath)
+    except OSError as exc: # Python >2.5
+        if exc.errno == EEXIST and path.isdir(mypath):
+            pass
+        else: raise
+
+modelName = "XGB"
+loadData()
+mkdir_p(directory + modelName)
+n_estimators = 2000
+modelFilePath = directory + modelName + "/xgbEstimators" + str(n_estimators) + "Depth" + str(max_depth)
 
 # fit model on training data
 model = XGBClassifier(
     objective = 'binary:logistic', # Logistic regression for binary classification, output probability
     booster = 'gbtree', # Set estimator as gradient boosting tree
     subsample = 1, # Percentage of the training samples used to train (consider this)
+    n_estimators = n_estimators # Number of trees in each classifier
 )
 
 param_dist = {
-    'n_estimators': stats.randint(1000, 200), # Number of trees in each classifier
-    'learning_rate': stats.uniform(0.25, 0.15), # Contribution of each estimator
-    'max_depth': [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], # Maximum depth of a tree
+    'learning_rate': stats.uniform(0.25, 0.1), # Contribution of each estimator
+    'max_depth': [4, 5, 6, 7, 8, 9, 10, 11, 12, 13], # Maximum depth of a tree
     'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1], # The fraction of columns to be subsampled
     'min_child_weight': [1, 2, 3, 4]    # Minimum sum of instance weight (hessian) needed in a child 8
                                         # In linear regression task, this simply corresponds to minimum 
@@ -43,7 +67,7 @@ param_dist = {
 clf = RandomizedSearchCV(
     model,
     param_distributions = param_dist,  
-    n_iter = 10, 
+    n_iter = 20, 
     cv = 3, # Cross-validation number of folds
     scoring = 'roc_auc', 
     error_score = 0, 
@@ -98,17 +122,3 @@ pickle.dump(clf.cv_results_, open(modelName + "/CVresults.dat", "wb"))
 # ax = plot_tree(clf.best_estimator_, rankdir='LR')
 # plt.tight_layout()
 # plt.savefig(modelName + "/bestTree.png", dpi = 600)
-
-pPsOrginalPositive = X_test[y_test > 0]
-pPsOrginalNegative = X_test[y_test == 0]
-pPsPredictedPositive = X_test[y_pred]
-pPsPredictedNegative = X_test[y_pred == 0]
-
-FP = pd.merge(pPsPredictedPositive,pPsOrginalNegative, how='inner')
-TP = pd.merge(pPsPredictedPositive,pPsOrginalPositive, how='inner')
-TN = pd.merge(pPsPredictedNegative,pPsOrginalNegative, how='inner')
-FN = pd.merge(pPsPredictedNegative,pPsOrginalPositive, how='inner')
-
-saveHistograms(FP, TP, TN, FN, modelName)
-reconstructionTest2D(FP, TP, modelName = modelName, title = 'IEC - XGB test recostrucion (TP + FP)')
-angleVsTime(FP, TP, TN, FN, modelName)

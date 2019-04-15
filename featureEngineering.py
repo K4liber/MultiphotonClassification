@@ -7,8 +7,8 @@ import pickle
 import sys
 
 pathToData = '/media/jasiek/F686ACAE86AC7133/Dokumenty/Studia/PracaMagisterska/Nema_Image_Quality/3000s/'
-if sys.argv[2] == 'K': pathToData = '/mnt/home/jbielecki1/NEMA/'
-part = sys.argv[1] # part form "00" to "18"
+pathToData = '/mnt/home/jbielecki1/NEMA/'
+part = sys.argv[1] # parts form "00" to "18"
 fileName = 'NEMA_IQ_384str_N0_1000_COINCIDENCES_'
 
 def dataFrameNames():
