@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from xgboost import plot_tree
 from sklearn.metrics import confusion_matrix
 import pickle
+import sys
 
 dataSize = int(sys.argv[1])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
