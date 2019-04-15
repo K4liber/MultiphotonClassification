@@ -19,14 +19,14 @@ directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
 
 def loadData():
     global X_train, X_test, y_train, y_test, class_test, class_train
-    X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')), npartitions = 10)
-    X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 10)
-    y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')), npartitions = 10)
-    y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')), npartitions = 10)
-    class_test = y_test[["class"]].to_dask_array()
-    class_train = y_train[["class"]].to_dask_array()
-    y_train = y_train[['newClass']].to_dask_array()
-    y_test = y_test[['newClass']].to_dask_array()
+    X_train = pickle.load(open(directory + 'xTrain', 'rb'))
+    X_test = pickle.load(open(directory + 'xTest', 'rb'))
+    y_train = pickle.load(open(directory + 'yTrain', 'rb'))
+    y_test = pickle.load(open(directory + 'yTest', 'rb'))
+    class_test = y_test[["class"]]
+    class_train = y_train[["class"]]
+    y_train = y_train[['newClass']]
+    y_test = y_test[['newClass']]
 
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
