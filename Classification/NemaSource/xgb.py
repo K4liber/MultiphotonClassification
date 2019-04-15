@@ -14,7 +14,6 @@ from sklearn.metrics import confusion_matrix
 import pickle
 
 dataSize = int(sys.argv[2])
-max_depth = int(sys.argv[1])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
 
 def loadData():
@@ -45,7 +44,7 @@ modelName = "XGB"
 loadData()
 mkdir_p(directory + modelName)
 n_estimators = 2000
-modelFilePath = directory + modelName + "/xgbEstimators" + str(n_estimators) + "Depth" + str(max_depth)
+modelFilePath = directory + modelName + "/xgbEstimatorsCV" + str(n_estimators)
 
 # fit model on training data
 model = XGBClassifier(
@@ -69,7 +68,9 @@ clf = RandomizedSearchCV(
     param_distributions = param_dist,  
     n_iter = 20, 
     cv = 3, # Cross-validation number of folds
-    scoring = 'roc_auc', 
+    scoring = 'roc_auc',
+    eval_set = [(X_test, y_test)],
+    early_stopping_rounds = 25,
     error_score = 0, 
     verbose = 2, 
     n_jobs = -1
