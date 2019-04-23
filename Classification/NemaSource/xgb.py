@@ -158,8 +158,8 @@ plot_confusion_matrix(
 )
 
 # save best model and all results to file
-pickle.dump(clf.best_estimator_, open(modelName + "/bestXGB.dat", "wb"))
-pickle.dump(clf.cv_results_, open(modelName + "/CVresults.dat", "wb"))
+pickle.dump(clf.best_estimator_, open(modelFilePath + "/bestXGB.dat", "wb"))
+pickle.dump(clf.cv_results_, open(modelFilePath + "/CVresults.dat", "wb"))
 # plot single tree
 # fig = plt.figure()
 # fig.set_size_inches(3600, 2400)
