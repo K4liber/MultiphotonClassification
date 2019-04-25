@@ -25,7 +25,8 @@ def dataFrameNames():
         "vol2", # 2 gamma volume ID
         "e1", # 1 gamma energy loss during detection [keV]
         "e2", # 2 gamma energy loss during detection [keV]
-        "class", # Type of coincidence(1-true, 2-phantom-scattered, 3-detector-scattered, 4-accidental)
+        "class", # Type of coincidence(1-true, 2-phantom-scattered, 
+                 # 3-detector-scattered, 4-accidental)
         "sX1", # 1 gamma emission x position [cm]
         "sY1", # 1 gamma emission y position [cm]
         "sZ1" # 1 gamma emission z position [cm]
