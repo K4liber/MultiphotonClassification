@@ -13,10 +13,47 @@ from sklearn.metrics import confusion_matrix
 import pickle
 import sys
 import dask.dataframe as dd
-from calc import *
 
 dataSize = int(sys.argv[1])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
+
+def plot_confusion_matrix(cm, classes, title, accuracy, modelName, cmap=plt.cm.Blues):
+    plt.clf()
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(
+        modelName + '\n' +
+        accuracy + '\n' + 
+        "Precision: " + '%.2f' % (cm[1, 1]*100/(cm[1, 1] + cm[0, 1])) + '% ,'
+        "recall: " + '%.2f' % (cm[1, 1]*100/(cm[1, 1] + cm[1, 0])) + '%'
+    )
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f'
+    thresh = (cm.max() + cm.min()) / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
+    plt.savefig(getWorkingDir() + modelName + "/" + title + 'confMatrix.png')
+
+def createROC(title, y, y_pred, modelName):
+    fpr_keras, tpr_keras, _ = roc_curve(y, y_pred)
+    auc_keras = auc(fpr_keras, tpr_keras)
+    plt.clf()
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.plot(fpr_keras, tpr_keras, label='AUC = {:.3f}'.format(auc_keras))
+    plt.xlabel('False positive rate')
+    plt.ylabel('True positive rate')
+    plt.title(title + '-ROC')
+    plt.legend(loc='best')
+    plt.savefig(directory + modelName + "/" + title + '-ROC.png')
 
 def loadData():
     global X_train, X_test, y_train, y_test, class_test, class_train
