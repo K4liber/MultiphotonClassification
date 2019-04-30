@@ -10,8 +10,9 @@ import dask.dataframe as dd
 import numpy as np
 import os
 
-dataSize = int(sys.argv[2])
-max_depth = int(sys.argv[1])
+dataSize = int(sys.argv[1])
+max_depth = int(sys.argv[2])
+n_estimators = int(sys.argv[3])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
 
 def loadData():
@@ -41,7 +42,6 @@ def mkdir_p(mypath):
 modelName = "ADA"
 loadData()
 mkdir_p(directory + modelName)
-n_estimators = 1000
 modelFilePath = directory + modelName + "/adaEstimators" + str(n_estimators) + "Depth" + str(max_depth)
 
 if os.path.isfile(modelFilePath):
