@@ -14,9 +14,11 @@ import pickle
 import sys
 import dask.dataframe as dd
 from sklearn.metrics import roc_curve, auc
+import itertools
 
 dataSize = int(sys.argv[1])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
+modelName = "XGB"
 
 def plot_confusion_matrix(cm, classes, title, accuracy, modelName, cmap=plt.cm.Blues):
     plt.clf()
@@ -42,7 +44,7 @@ def plot_confusion_matrix(cm, classes, title, accuracy, modelName, cmap=plt.cm.B
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
     plt.tight_layout()
-    plt.savefig(getWorkingDir() + modelName + "/" + title + 'confMatrix.png')
+    plt.savefig(directory + modelName + "/" + title + 'confMatrix.png')
 
 def createROC(title, y, y_pred, modelName):
     fpr_keras, tpr_keras, _ = roc_curve(y, y_pred)
@@ -80,7 +82,6 @@ def mkdir_p(mypath):
             pass
         else: raise
 
-modelName = "XGB"
 loadData()
 mkdir_p(directory + modelName)
 n_estimators = 2000
