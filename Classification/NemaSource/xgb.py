@@ -86,6 +86,7 @@ loadData()
 mkdir_p(directory + modelName)
 n_estimators = 2000
 modelFilePath = directory + modelName + "/xgbEstimatorsCV" + str(n_estimators)
+mkdir_p(modelFilePath)
 
 # fit model on training data
 model = XGBClassifier(
