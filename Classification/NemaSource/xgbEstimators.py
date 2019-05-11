@@ -45,7 +45,7 @@ loadData()
 mkdir_p(directory + modelName)
 bestXGBModelPath = directory + modelName + "/xgbEstimatorsCV2000/bestXGB.dat"
 modelFilePath = directory + modelName + "/xgbEstimators" + str(n_estimators) + "Depth" + str(max_depth)
-model = pickle.load(open(bestXGBModelPath + ".dat", 'rb'))
+model = pickle.load(open(bestXGBModelPath, 'rb'))
 params = {
     "max_depth": max_depth,
     "n_estimators": n_estimators
