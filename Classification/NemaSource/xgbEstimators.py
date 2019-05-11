@@ -11,8 +11,9 @@ import dask.dataframe as dd
 import numpy as np
 import os
 
-dataSize = int(sys.argv[2])
-max_depth = int(sys.argv[1])
+dataSize = int(sys.argv[1])
+max_depth = int(sys.argv[2])
+n_estimators = int(sys.argv[3])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
 
 def loadData():
@@ -42,30 +43,24 @@ def mkdir_p(mypath):
 modelName = "XGB"
 loadData()
 mkdir_p(directory + modelName)
-n_estimators = 2000
+bestXGBModelPath = directory + modelName + "/xgbEstimatorsCV2000/bestXGB.dat"
 modelFilePath = directory + modelName + "/xgbEstimators" + str(n_estimators) + "Depth" + str(max_depth)
+model = pickle.load(open(bestXGBModelPath + ".dat", 'rb'))
+params = {
+    "max_depth": max_depth,
+    "n_estimators": n_estimators
+}
+model.set_params(**params)
 
-if os.path.isfile(modelFilePath):
-    model = pickle.load(open(modelFilePath + ".dat", 'rb'))
-else:
-    model = xgb.XGBClassifier(
-        objective = 'binary:logistic', # Logistic regression for binary classification, output probability
-        booster = 'gbtree', # Set estimator as gradient boosting tree
-        subsample = 1, # Percentage of the training samples used to train (consider this)
-        n_estimators = n_estimators, # Number of trees in each classifier
-        learning_rate = 0.2, # Contribution of each estimator
-        max_depth = max_depth, # Maximum depth of a tree
-        colsample_bytree = 0.6, # The fraction of columns to be subsampled
-    )
-    results = {}
-    eval_set = [( X_train, y_train), ( X_test, y_test)]
-    model.fit(
-        X_train, y_train, 
-        early_stopping_rounds = 20, 
-        eval_set = eval_set,
-        eval_metric = ["error"],
-        callbacks = [xgb.callback.record_evaluation(results)]
-    )
+results = {}
+eval_set = [( X_train, y_train), ( X_test, y_test)]
+model.fit(
+    X_train, y_train, 
+    early_stopping_rounds = 20, 
+    eval_set = eval_set,
+    eval_metric = ["error"],
+    callbacks = [xgb.callback.record_evaluation(results)]
+)
 
 train_accuracy = [ 1.0 - x for x in results['validation_0']['error'] ]
 test_accuracy = [ 1.0 - x for x in results['validation_1']['error'] ]
