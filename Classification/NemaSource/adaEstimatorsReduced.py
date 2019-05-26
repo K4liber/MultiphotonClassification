@@ -1,6 +1,5 @@
 #!/usr/bin/env python3.6
 
-import xgboost as xgb
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 import pickle
@@ -16,7 +15,7 @@ max_depth = int(sys.argv[2])
 n_estimators = int(sys.argv[3])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
 
-def loadData():
+def loadReducedData():
     global X_train, X_test, y_train, y_test, class_test, class_train
     X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')), npartitions = 10)
     X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 10)
@@ -40,30 +39,27 @@ def mkdir_p(mypath):
             pass
         else: raise
 
-modelName = "XGB"
-loadData()
+modelName = "ADA"
+loadReducedData()
 mkdir_p(directory + modelName)
-bestXGBModelPath = '/mnt/home/jbielecki1/NEMA/10000000/XGB/xgbEstimatorsCV2000/bestXGB.dat'
-modelFilePath = directory + modelName + "/xgbEstimators" + str(n_estimators) + "Depth" + str(max_depth)
-model = pickle.load(open(bestXGBModelPath, 'rb'))
-params = {
-    "max_depth": max_depth,
-    "n_estimators": n_estimators
-}
-model.set_params(**params)
+modelFilePath = directory + modelName + "/adaEstimatorsReduced" + str(n_estimators) + "Depth" + str(max_depth)
 
-results = {}
-eval_set = [( X_train, y_train), ( X_test, y_test)]
-model.fit(
-    X_train, y_train, 
-    early_stopping_rounds = 20, 
-    eval_set = eval_set,
-    eval_metric = ["error"],
-    callbacks = [xgb.callback.record_evaluation(results)]
-)
+if os.path.isfile(modelFilePath):
+    model = pickle.load(open(modelFilePath + ".dat", 'rb'))
+else:
+    model = AdaBoostClassifier(
+        base_estimator = DecisionTreeClassifier(max_depth = max_depth),
+        n_estimators = n_estimators,
+        learning_rate = 0.2
+    )
+    model.fit(X_train, y_train)
 
-train_accuracy = [ 1.0 - x for x in results['validation_0']['error'] ]
-test_accuracy = [ 1.0 - x for x in results['validation_1']['error'] ]
+test_accuracy = []
+train_accuracy = []
+
+for test_predicts, train_predicts in zip(model.staged_predict(X_test), model.staged_predict(X_train)):
+    test_accuracy.append(accuracy_score(test_predicts, np.array(y_test)))
+    train_accuracy.append(accuracy_score(train_predicts, np.array(y_train)))
 
 # save model to file
 pickle.dump(model, open(modelFilePath, "wb"), protocol=4)
@@ -75,8 +71,7 @@ plt.plot([i+1 for i in range(len(train_accuracy))], train_accuracy, label = "sku
 plt.plot([i+1 for i in range(len(test_accuracy))], test_accuracy, label = "skuteczność - test")
 plt.xlabel("liczba drzew")
 plt.ylabel("odsetek poprawnie sklasyfikowanych próbek")
-plt.title("XGBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
+plt.title("AdaBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
 plt.legend(loc = "upper right")
 plt.savefig(modelFilePath + ".png")
 plt.clf()
-
