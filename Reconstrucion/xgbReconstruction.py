@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.6
+
 import pickle
 import numpy as np
 import pandas as pd
