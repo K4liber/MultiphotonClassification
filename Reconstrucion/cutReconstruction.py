@@ -9,7 +9,7 @@ pathToFile = '/mnt/home/jbielecki1/NEMA/'
 data1 = pickle.load(open(pathToFile + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_PREPARED_part01', 'rb'))
 data2 = pickle.load(open(pathToFile + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_PREPARED_part02', 'rb'))
 data3 = pickle.load(open(pathToFile + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_PREPARED_part03', 'rb'))
-data = pd.concat([data, data2, data3])
+data = pd.concat([data1, data2, data3])
 
 # Cut params
 width1 = 1050.0
