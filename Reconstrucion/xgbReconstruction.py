@@ -13,7 +13,7 @@ model = pickle.load(open(directory + modelFileName, 'rb'))
 data = pickle.load(open(directory + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_PREPARED_part01', 'rb'))
 data2 = pickle.load(open(directory + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_PREPARED_part02', 'rb'))
 data3 = pickle.load(open(directory + 'NEMA_IQ_384str_N0_1000_COINCIDENCES_PREPARED_part03', 'rb'))
-allData = pd.concat([data, data2, data3])
+allData = pd.concat([data1, data2, data3])
 
 codes = {1:1, 2:0, 3:0, 4:0}
 y = allData["class"].map(codes)
