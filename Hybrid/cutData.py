@@ -64,4 +64,4 @@ def cutGeometry(row):
 cuttedData = data.apply(cutGeometry, axis = 1)
 pPsPredictedPositive = pd.DataFrame(pd.concat([cuttedData[cuttedData == 1], cuttedData[cuttedData == 2]]).sort_index())
 dataPositive = data.iloc[list(pPsPredictedPositive.index),:]
-dataRec.to_csv(pathToFile + 'cutData', sep = "\t", header = False, index = False)
+dataPositive.to_csv(pathToFile + 'cutData', sep = "\t", header = False, index = False)
