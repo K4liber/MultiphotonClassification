@@ -63,7 +63,7 @@ directory = '/mnt/home/jbielecki1/NEMA/'
 fileName = 'cutData'
 mkdir_p(directory + str(dataSize))
 xTrain, xTest, yTrain, yTest = createLearningBatches(directory + fileName, dataSize)
-pickle.dump(xTest, open(directory + str(dataSize) + "/xTest", 'wb'), protocol=4)
-pickle.dump(xTrain, open(directory + str(dataSize) + "/xTrain", 'wb'), protocol=4)
-pickle.dump(yTest, open(directory + str(dataSize) + "/yTest", 'wb'), protocol=4)
-pickle.dump(yTrain, open(directory + str(dataSize) + "/yTrain", 'wb'), protocol=4)
+pickle.dump(xTest, open(directory + "cut_parts4" + "/xTest", 'wb'), protocol=4)
+pickle.dump(xTrain, open(directory + "cut_parts4" + "/xTrain", 'wb'), protocol=4)
+pickle.dump(yTest, open(directory + "cut_parts4" + "/yTest", 'wb'), protocol=4)
+pickle.dump(yTrain, open(directory + "cut_parts4" + "/yTrain", 'wb'), protocol=4)
