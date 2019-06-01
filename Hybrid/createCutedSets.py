@@ -49,7 +49,7 @@ def mkdir_p(mypath):
             pass
         else: raise
 
-def createLearningBatches(filePath)
+def createLearningBatches(filePath):
     df = pickle.load(open(filePath, 'rb'))
     codes = {1:1, 2:0, 3:0, 4:0}
     df["newClass"] = df["class"].map(codes)
