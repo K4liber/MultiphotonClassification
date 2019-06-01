@@ -61,7 +61,7 @@ def createLearningBatches(filePath)
 
 directory = '/mnt/home/jbielecki1/NEMA/'
 fileName = 'cutData'
-mkdir_p(directory + str(dataSize))
+mkdir_p((directory + "cut_parts4")
 xTrain, xTest, yTrain, yTest = createLearningBatches(directory + fileName, dataSize)
 pickle.dump(xTest, open(directory + "cut_parts4" + "/xTest", 'wb'), protocol=4)
 pickle.dump(xTrain, open(directory + "cut_parts4" + "/xTrain", 'wb'), protocol=4)
