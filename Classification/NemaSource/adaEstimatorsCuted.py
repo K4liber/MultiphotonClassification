@@ -70,7 +70,7 @@ plt.plot([i+1 for i in range(len(train_accuracy))], train_accuracy, label = "sku
 plt.plot([i+1 for i in range(len(test_accuracy))], test_accuracy, label = "skuteczność - test")
 plt.xlabel("liczba drzew")
 plt.ylabel("odsetek poprawnie sklasyfikowanych próbek")
-plt.title("AdaBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(bestAccuracy) + ", n = " + str(bestNEstimators) + ")")
+plt.title("AdaBoost accuracy (max_depth = " + str(max_depth) + ", best test accuracy: " + str(round(bestAccuracy*100, 2)) + "%, n = " + str(bestNEstimators) + ")")
 plt.legend(loc = "upper right")
 plt.savefig(modelFilePath + ".png")
 plt.clf()
