@@ -50,6 +50,11 @@ def mkdir_p(mypath):
         else: raise
 
 def createLearningBatches(filePath):
+    data = pd.read_csv(
+        filePath, 
+        sep = "\t", 
+        names = dataFrameNames()
+    )
     df = pickle.load(open(filePath, 'rb'))
     codes = {1:1, 2:0, 3:0, 4:0}
     df["newClass"] = df["class"].map(codes)
