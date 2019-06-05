@@ -14,11 +14,24 @@ dataSize = int(sys.argv[1])
 max_depth = int(sys.argv[2])
 n_estimators = int(sys.argv[3])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
+attributes = [
+    'e1',
+    'e2',
+    'eSum',
+    'deg2D',
+    'deg3D',
+    'lorL',
+    'dt'
+]
 
-def loadReducedData():
+def loadReducedData(dropList):
     global X_train, X_test, y_train, y_test, class_test, class_train
     X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')), npartitions = 10)
     X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 10)
+
+    X_train = X_train[attributes]
+    X_test = X_test[attributes]
+
     y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')), npartitions = 10)
     y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')), npartitions = 10)
     class_test = y_test[["class"]].to_dask_array()
@@ -40,7 +53,7 @@ def mkdir_p(mypath):
         else: raise
 
 modelName = "ADA"
-loadReducedData()
+loadReducedData(attributes)
 mkdir_p(directory + modelName)
 modelFilePath = directory + modelName + "/adaEstimatorsReduced" + str(n_estimators) + "Depth" + str(max_depth)
 
