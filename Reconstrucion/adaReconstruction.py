@@ -38,4 +38,4 @@ pPsPredictedPositive = x[y_pred]
 dataPositive = data.iloc[list(pPsPredictedPositive.index),:]
 dataRec = dataPositive.iloc[:,:16]
 
-dataRec.to_csv(directory + 'adaReconstruction_parts16', sep = "\t", header = False, index = False)
+dataRec.to_csv(pathToFile + 'adaReconstruction_parts16', sep = "\t", header = False, index = False)
