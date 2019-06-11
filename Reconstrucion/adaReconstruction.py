@@ -24,8 +24,9 @@ def getGOJAFormatPositivePrediction(filePath):
 for i in range(8):
     dataPositiveParts.append(getGOJAFormatPositivePrediction(pathToFile + fileName + '0' + str(i+1)))
 
-for i in range(8):
-    dataPositiveParts.append(getGOJAFormatPositivePrediction(pathToFile + fileName + '1' + str(i)))
+for i in range(9):
+    if i != 3:
+        dataPositiveParts.append(getGOJAFormatPositivePrediction(pathToFile + fileName + '1' + str(i)))
     
 dataRec = pd.concat(dataPositiveParts)
 dataRec.to_csv(pathToFile + 'adaReconstruction_parts16', sep = "\t", header = False, index = False)
