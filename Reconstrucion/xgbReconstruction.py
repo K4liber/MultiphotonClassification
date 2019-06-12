@@ -23,13 +23,13 @@ def getGOJAFormatPositivePrediction(filePath):
     dataPositive = data.iloc[list(pPsPredictedPositive.index),:]
     return dataPositive.iloc[:,:16]
 
-for i in range(8):
+for i in range(9):
     dataPositiveParts.append(getGOJAFormatPositivePrediction(pathToFile + fileName + '0' + str(i+1)))
 
-for i in range(9):
+for i in range(8):
     if i != 3:
         dataPositiveParts.append(getGOJAFormatPositivePrediction(pathToFile + fileName + '1' + str(i)))
     
 
 dataRec = pd.concat(dataPositiveParts)
-dataRec.to_csv(pathToFile + 'xgbReconstruction_parts3_' + str(threshold), sep = "\t", header = False, index = False)
+dataRec.to_csv(pathToFile + 'xgbReconstruction_parts16_' + str(threshold), sep = "\t", header = False, index = False)
