@@ -2,11 +2,11 @@
 
 import pickle
 import pandas as pd
-import sysconfig
+import sys
+
 directory = '/mnt/home/jbielecki1/NEMA/10000000/'
 max_depth = int(sys.argv[1])
 modelFileName = 'ADA/adaEstimators1000Depth' + str(max_depth)
-
 
 model = pickle.load(open(directory + modelFileName, 'rb'))
 X_test = pickle.load(open(directory + 'xTest', 'rb'))
