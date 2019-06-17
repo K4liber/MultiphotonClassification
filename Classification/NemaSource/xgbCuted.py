@@ -64,7 +64,7 @@ param_dist = {
 clf = RandomizedSearchCV(
     model,
     param_distributions = param_dist,  
-    n_iter = 20, 
+    n_iter = 10, 
     cv = 3, # Cross-validation number of folds
     scoring = 'roc_auc',
     error_score = 0, 
