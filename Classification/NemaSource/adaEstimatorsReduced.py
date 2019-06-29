@@ -24,7 +24,7 @@ attributes = [
     'dt'
 ]
 
-def loadReducedData(dropList):
+def loadReducedData():
     global X_train, X_test, y_train, y_test, class_test, class_train
     X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')), npartitions = 10)
     X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 10)
