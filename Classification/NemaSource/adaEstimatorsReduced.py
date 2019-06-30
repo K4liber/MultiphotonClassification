@@ -53,7 +53,7 @@ def mkdir_p(mypath):
         else: raise
 
 modelName = "ADA"
-loadReducedData(attributes)
+loadReducedData()
 mkdir_p(directory + modelName)
 modelFilePath = directory + modelName + "/adaEstimatorsReduced" + str(n_estimators) + "Depth" + str(max_depth)
 

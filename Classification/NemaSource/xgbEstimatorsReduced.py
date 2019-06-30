@@ -15,11 +15,24 @@ dataSize = int(sys.argv[1])
 max_depth = int(sys.argv[2])
 n_estimators = int(sys.argv[3])
 directory = '/mnt/home/jbielecki1/NEMA/' + str(dataSize) + "/"
+attributes = [
+    'e1',
+    'e2',
+    'eSum',
+    'deg2D',
+    'deg3D',
+    'lorL',
+    'dt'
+]
 
 def loadData():
     global X_train, X_test, y_train, y_test, class_test, class_train
     X_train = dd.from_pandas(pickle.load(open(directory + 'xTrain', 'rb')), npartitions = 10)
     X_test = dd.from_pandas(pickle.load(open(directory + 'xTest', 'rb')), npartitions = 10)
+
+    X_train = X_train[attributes]
+    X_test = X_test[attributes]
+
     y_train = dd.from_pandas(pickle.load(open(directory + 'yTrain', 'rb')), npartitions = 10)
     y_test = dd.from_pandas(pickle.load(open(directory + 'yTest', 'rb')), npartitions = 10)
     class_test = y_test[["class"]].to_dask_array()
@@ -44,7 +57,7 @@ modelName = "XGB"
 loadData()
 mkdir_p(directory + modelName)
 bestXGBModelPath = '/mnt/home/jbielecki1/NEMA/10000000/XGB/xgbEstimatorsCV2000/bestXGB.dat'
-modelFilePath = directory + modelName + "/xgbEstimators" + str(n_estimators) + "Depth" + str(max_depth)
+modelFilePath = directory + modelName + "/xgbEstimatorsReduced" + str(n_estimators) + "Depth" + str(max_depth)
 model = pickle.load(open(bestXGBModelPath, 'rb'))
 params = {
     "max_depth": max_depth,
